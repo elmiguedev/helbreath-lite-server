@@ -1,0 +1,10 @@
+import { WorldMap } from "../../domain/entities/WorldMap";
+import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
+import { Action } from "../Action";
+
+export class GetWorldMapsAction implements Action<string, WorldMap[]> {
+  constructor(private readonly worldMapRepository: WorldMapRepository) { }
+  public execute(): WorldMap[] {
+    return this.worldMapRepository.getAll();
+  }
+}

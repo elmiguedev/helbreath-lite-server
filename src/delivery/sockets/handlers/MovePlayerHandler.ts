@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { MovePlayerAction } from "../../../core/actions/MovePlayerAction";
+import { MovePlayerAction } from "../../../core/actions/players/MovePlayerAction";
 
 export const MOVE_PLAYER_MESSAGE = "player:move";
 export interface MovePlayerHandlerParams {

@@ -1,1 +1,1 @@
-export const ROOM_LOGIC_TIME = 1000 / 60;
+export const GAME_LOOP_INTERVAL = 1000 / 60;
