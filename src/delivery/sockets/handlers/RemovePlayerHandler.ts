@@ -4,10 +4,11 @@ import { RemovePlayerAction } from "../../../core/actions/players/RemovePlayerAc
 export const REMOVE_PLAYER_MESSAGE = "disconnect";
 
 export class RemovePlayerHandler {
-  constructor(private readonly socket: Socket, action: RemovePlayerAction) {
+  constructor(sockets: Record<string, Socket>, socket: Socket, action: RemovePlayerAction) {
     socket.on(REMOVE_PLAYER_MESSAGE, () => {
       action.execute({ id: socket.id });
       socket.broadcast.emit("player:disconnected", socket.id);
+      delete sockets[socket.id];
     })
   }
 }

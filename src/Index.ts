@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "node:http";
-import { Server as SocketServer } from "socket.io";
+import { Socket, Server as SocketServer } from "socket.io";
 import { InMemoryPlayerRepository } from "./core/infrastructure/InMemoryPlayerRepository";
 import { CreatePlayerAction } from "./core/actions/players/CreatePlayerAction";
 import { RemovePlayerAction } from "./core/actions/players/RemovePlayerAction";
@@ -16,6 +16,7 @@ import { InMemoryWorldMapRepository } from "./core/infrastructure/InMemoryWorldM
 import { GetPlayersByWorldMapAction } from "./core/actions/players/GetPlayersByWorldMap";
 import { GetWorldStatusAction } from "./core/actions/world/GetWorldStatusAction";
 import { GetWorldMapsAction } from "./core/actions/world/GetWorldMapsAction";
+import { CheckPlayerInPortalAction } from "./core/actions/players/CheckPlayerInPortalAction";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
@@ -29,9 +30,10 @@ worldMapRepository.addMap({
     {
       id: "world_portal_1",
       worldMapId: "world",
-      position: { x: 300, y: 300 },
+      position: { x: 700, y: 300 },
+      size: { width: 60, height: 60 },
       targetWorldMapId: "outworld",
-      targetPosition: { x: 0, y: 0 }
+      targetPosition: { x: 100, y: 300 }
     },
   ]
 })
@@ -42,9 +44,10 @@ worldMapRepository.addMap({
     {
       id: "outworld_portal_1",
       worldMapId: "outworld",
-      position: { x: 300, y: 300 },
+      position: { x: 10, y: 300 },
+      size: { width: 60, height: 60 },
       targetWorldMapId: "world",
-      targetPosition: { x: 0, y: 0 }
+      targetPosition: { x: 700, y: 300 }
     },
   ]
 })
@@ -60,6 +63,7 @@ const changeMapAction = new ChangeMapAction(playerRepository);
 const getWorldMapAction = new GetWorldMapAction(worldMapRepository)
 const getWorldMapsAction = new GetWorldMapsAction(worldMapRepository)
 const getWorldStatusAction = new GetWorldStatusAction(worldMapRepository, playerRepository);
+const checkPlayerInPortalAction = new CheckPlayerInPortalAction(playerRepository, worldMapRepository);
 
 // creamos los servicios de delivery
 const app = express();
@@ -71,11 +75,14 @@ const socketServer = new SocketServer(server, {
 });
 
 // definimos los mensajes del servidor al cliente y viceversa
+const sockets: Record<string, Socket> = {}
 socketServer.on("connection", (socket: any) => {
+  sockets[socket.id] = socket;
   createPlayerAction.execute({ id: socket.id, name: socket.id, worldMapId: "world" });
+  socket.join("world");
   // socket.emit("world:state", getWorldStatusAction.execute("world")); // lo podemos boletear?
 
-  new RemovePlayerHandler(socket, removePlayerAction);
+  new RemovePlayerHandler(sockets, socket, removePlayerAction);
   new MovePlayerHandler(socket, movePlayerAction);
 });
 
@@ -83,8 +90,22 @@ socketServer.on("connection", (socket: any) => {
 const worldMaps = getWorldMapsAction.execute();
 worldMaps.forEach(worldMap => {
   const gameLoopInterval = setInterval(() => {
+    // updateamos posiciones
     updatePlayersPositionsAction.execute(worldMap.id);
-    socketServer.emit("world:state", getWorldStatusAction.execute(worldMap.id));
+
+    // validamos colisiones con portales
+    // .. hacer una accion que recorra todos los players y controle colision con portales y si lo hace, tiene uqe hacer el cambio
+    const changes = checkPlayerInPortalAction.execute(worldMap.id);
+    changes.forEach(change => {
+      const playerSocket = sockets[change.playerId];
+      playerSocket.leave(change.fromWorldMapId);
+      playerSocket.join(change.toWorldMapId);
+      playerSocket.emit("world:change", change);
+      playerSocket.broadcast.emit("player:disconnected", change.playerId);
+    });
+
+    // actualiza el estado de cada sala
+    socketServer.to(worldMap.id).emit("world:state", getWorldStatusAction.execute(worldMap.id));
   }, GAME_LOOP_INTERVAL);
 });
 
