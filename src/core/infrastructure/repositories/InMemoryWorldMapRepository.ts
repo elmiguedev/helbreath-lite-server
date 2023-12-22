@@ -1,5 +1,5 @@
-import { WorldMap } from "../domain/entities/WorldMap";
-import { WorldMapRepository } from "../domain/respositories/WorldMapRepository";
+import { WorldMap } from "../../domain/entities/WorldMap";
+import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
 
 export class InMemoryWorldMapRepository implements WorldMapRepository {
   private worldMaps: Map<string, WorldMap>;

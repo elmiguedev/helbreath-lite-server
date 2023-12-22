@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "node:http";
 import { Socket, Server as SocketServer } from "socket.io";
-import { InMemoryPlayerRepository } from "./core/infrastructure/InMemoryPlayerRepository";
+import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/InMemoryPlayerRepository";
 import { CreatePlayerAction } from "./core/actions/players/CreatePlayerAction";
 import { RemovePlayerAction } from "./core/actions/players/RemovePlayerAction";
 import { UpdatePlayersPositionsAction } from "./core/actions/players/UpdatePlayersPositionsAction";
@@ -12,11 +12,17 @@ import { GAME_LOOP_INTERVAL } from "./core/utils/Constants";
 import { GetPlayersAction } from "./core/actions/players/GetPlayersAction";
 import { ChangeMapAction } from "./core/actions/players/ChangeMapAction";
 import { GetWorldMapAction } from "./core/actions/world/GetWorldMapAction";
-import { InMemoryWorldMapRepository } from "./core/infrastructure/InMemoryWorldMapRepository";
+import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/InMemoryWorldMapRepository";
 import { GetPlayersByWorldMapAction } from "./core/actions/players/GetPlayersByWorldMap";
 import { GetWorldStatusAction } from "./core/actions/world/GetWorldStatusAction";
 import { GetWorldMapsAction } from "./core/actions/world/GetWorldMapsAction";
 import { CheckPlayerInPortalAction } from "./core/actions/players/CheckPlayerInPortalAction";
+import { InMemoryGameService } from "./core/infrastructure/services/InMemoryGameService";
+import { PortalCollisionListener } from "./core/listeners/PortalCollisionListener";
+import { WorldMapTickListener } from "./core/listeners/WorldMapTickListener";
+import { WorldStatusNotifier } from "./delivery/sockets/notifiers/WorldStatusNotifier";
+import { PortalCollisionNotifier } from "./delivery/sockets/notifiers/PortalCollisionNotifier";
+import { StartGameAction } from "./core/actions/game/StartGameAction";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
@@ -52,18 +58,20 @@ worldMapRepository.addMap({
   ]
 })
 
+// creamos el servicio principal del juego
+const gameService = new InMemoryGameService(playerRepository, worldMapRepository);
+
 // creamos las acciones del juego
 const createPlayerAction = new CreatePlayerAction(playerRepository);
 const removePlayerAction = new RemovePlayerAction(playerRepository);
 const movePlayerAction = new MovePlayerAction(playerRepository);
-const getPlayersAction = new GetPlayersAction(playerRepository);
-const getPlayersByWorldMapAction = new GetPlayersByWorldMapAction(playerRepository);
-const updatePlayersPositionsAction = new UpdatePlayersPositionsAction(playerRepository);
-const changeMapAction = new ChangeMapAction(playerRepository);
-const getWorldMapAction = new GetWorldMapAction(worldMapRepository)
-const getWorldMapsAction = new GetWorldMapsAction(worldMapRepository)
-const getWorldStatusAction = new GetWorldStatusAction(worldMapRepository, playerRepository);
-const checkPlayerInPortalAction = new CheckPlayerInPortalAction(playerRepository, worldMapRepository);
+const startGameAction = new StartGameAction(gameService);
+
+// creamos los listeners del juego
+const portalCollisionListener = new PortalCollisionListener(gameService);
+const worldMapTickListener = new WorldMapTickListener(gameService);
+gameService.addPortalCollisionListener(portalCollisionListener);
+gameService.addWorldMapTickListener(worldMapTickListener);
 
 // creamos los servicios de delivery
 const app = express();
@@ -78,37 +86,23 @@ const socketServer = new SocketServer(server, {
 const sockets: Record<string, Socket> = {}
 socketServer.on("connection", (socket: any) => {
   sockets[socket.id] = socket;
+  // TODO: cambiar la dependencia de la accion al game service (o el game service a la altura de las acciones)
   createPlayerAction.execute({ id: socket.id, name: socket.id, worldMapId: "world" });
   socket.join("world");
-  // socket.emit("world:state", getWorldStatusAction.execute("world")); // lo podemos boletear?
 
   new RemovePlayerHandler(sockets, socket, removePlayerAction);
   new MovePlayerHandler(socket, movePlayerAction);
 });
 
-// creamos el game loop de cada mapa
-const worldMaps = getWorldMapsAction.execute();
-worldMaps.forEach(worldMap => {
-  const gameLoopInterval = setInterval(() => {
-    // updateamos posiciones
-    updatePlayersPositionsAction.execute(worldMap.id);
+const worldStatusNotifier = new WorldStatusNotifier(socketServer);
+const portalCollisionNotifier = new PortalCollisionNotifier(sockets);
 
-    // validamos colisiones con portales
-    // .. hacer una accion que recorra todos los players y controle colision con portales y si lo hace, tiene uqe hacer el cambio
-    const changes = checkPlayerInPortalAction.execute(worldMap.id);
-    changes.forEach(change => {
-      const playerSocket = sockets[change.playerId];
-      playerSocket.leave(change.fromWorldMapId);
-      playerSocket.join(change.toWorldMapId);
-      playerSocket.emit("world:change", change);
-      playerSocket.broadcast.emit("player:disconnected", change.playerId);
-    });
+// agregamos los listeners y corremos le juego
+portalCollisionListener.suscribe(portalCollisionNotifier);
+worldMapTickListener.suscribe(worldStatusNotifier);
+startGameAction.execute();
 
-    // actualiza el estado de cada sala
-    socketServer.to(worldMap.id).emit("world:state", getWorldStatusAction.execute(worldMap.id));
-  }, GAME_LOOP_INTERVAL);
-});
-
+// algunos metodos de api
 app.get("/ping", (req, res) => {
   res.send("Pong!");
 })
