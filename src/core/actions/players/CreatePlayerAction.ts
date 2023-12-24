@@ -16,9 +16,13 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
       id: params.id,
       name: params.name,
       worldMapId: params.worldMapId,
+      bounds: {
+        width: 32,
+        height: 32,
+      },
       position: {
-        x: 0,
-        y: 0
+        x: 60,
+        y: 60
       }
     })
   }

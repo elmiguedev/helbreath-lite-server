@@ -1,4 +1,5 @@
 import { WorldMap } from "../domain/entities/WorldMap";
+import { WorldStatus } from "../domain/entities/WorldStatus";
 import { GameService } from "../domain/services/GameService";
 import { GameServiceListener } from "../domain/services/GameServiceListener";
 
@@ -10,9 +11,9 @@ export class WorldMapTickListener implements GameServiceListener {
     this.gameService.addWorldMapTickListener(this);
   }
 
-  public notify(worldMap: WorldMap): void {
+  public notify(worldMapStatus: WorldStatus): void {
     this.listeners.forEach(listener => {
-      listener.notify(worldMap);
+      listener.notify(worldMapStatus);
     })
   }
 

@@ -1,3 +1,4 @@
+import { Bounds } from "./Bounds";
 import { Position } from "./Position";
 
 export interface Player {
@@ -6,4 +7,5 @@ export interface Player {
   position: Position;
   target?: Position;
   worldMapId: string;
+  bounds: Bounds;
 }

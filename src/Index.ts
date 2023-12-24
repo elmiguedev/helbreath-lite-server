@@ -8,15 +8,7 @@ import { UpdatePlayersPositionsAction } from "./core/actions/players/UpdatePlaye
 import { MovePlayerAction } from "./core/actions/players/MovePlayerAction";
 import { MovePlayerHandler } from "./delivery/sockets/handlers/MovePlayerHandler";
 import { RemovePlayerHandler } from "./delivery/sockets/handlers/RemovePlayerHandler";
-import { GAME_LOOP_INTERVAL } from "./core/utils/Constants";
-import { GetPlayersAction } from "./core/actions/players/GetPlayersAction";
-import { ChangeMapAction } from "./core/actions/players/ChangeMapAction";
-import { GetWorldMapAction } from "./core/actions/world/GetWorldMapAction";
 import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/InMemoryWorldMapRepository";
-import { GetPlayersByWorldMapAction } from "./core/actions/players/GetPlayersByWorldMap";
-import { GetWorldStatusAction } from "./core/actions/world/GetWorldStatusAction";
-import { GetWorldMapsAction } from "./core/actions/world/GetWorldMapsAction";
-import { CheckPlayerInPortalAction } from "./core/actions/players/CheckPlayerInPortalAction";
 import { InMemoryGameService } from "./core/infrastructure/services/InMemoryGameService";
 import { PortalCollisionListener } from "./core/listeners/PortalCollisionListener";
 import { WorldMapTickListener } from "./core/listeners/WorldMapTickListener";
@@ -27,36 +19,6 @@ import { StartGameAction } from "./core/actions/game/StartGameAction";
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
 const worldMapRepository = new InMemoryWorldMapRepository();
-
-// cargamos los maps
-worldMapRepository.addMap({
-  id: "world",
-  name: "world",
-  portals: [
-    {
-      id: "world_portal_1",
-      worldMapId: "world",
-      position: { x: 700, y: 300 },
-      size: { width: 60, height: 60 },
-      targetWorldMapId: "outworld",
-      targetPosition: { x: 100, y: 300 }
-    },
-  ]
-})
-worldMapRepository.addMap({
-  id: "outworld",
-  name: "outworld",
-  portals: [
-    {
-      id: "outworld_portal_1",
-      worldMapId: "outworld",
-      position: { x: 10, y: 300 },
-      size: { width: 60, height: 60 },
-      targetWorldMapId: "world",
-      targetPosition: { x: 700, y: 300 }
-    },
-  ]
-})
 
 // creamos el servicio principal del juego
 const gameService = new InMemoryGameService(playerRepository, worldMapRepository);

@@ -11,6 +11,9 @@ dependencies:
   socket.io:
     specifier: ^4.7.2
     version: 4.7.2
+  tiled-parser:
+    specifier: ^0.1.2
+    version: 0.1.2
 
 devDependencies:
   '@types/express':
@@ -597,6 +600,10 @@ packages:
     engines: {node: '>=0.12.0'}
     dev: true
 
+  /lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+    dev: false
+
   /lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
@@ -886,6 +893,12 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       has-flag: 3.0.0
+
+  /tiled-parser@0.1.2:
+    resolution: {integrity: sha512-s0E2ihke0BFxRH6BWxNrK18VFbRlnZEymeyJHM46LKelfJ9/qsszdnHN/9xA0xo4lKt7VxhiBZ57+zliLHl3Ig==}
+    dependencies:
+      lodash: 4.17.21
+    dev: false
 
   /to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
