@@ -4,7 +4,6 @@ import { Socket, Server as SocketServer } from "socket.io";
 import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/InMemoryPlayerRepository";
 import { CreatePlayerAction } from "./core/actions/players/CreatePlayerAction";
 import { RemovePlayerAction } from "./core/actions/players/RemovePlayerAction";
-import { UpdatePlayersPositionsAction } from "./core/actions/players/UpdatePlayersPositionsAction";
 import { MovePlayerAction } from "./core/actions/players/MovePlayerAction";
 import { MovePlayerHandler } from "./delivery/sockets/handlers/MovePlayerHandler";
 import { RemovePlayerHandler } from "./delivery/sockets/handlers/RemovePlayerHandler";
@@ -49,8 +48,8 @@ const sockets: Record<string, Socket> = {}
 socketServer.on("connection", (socket: any) => {
   sockets[socket.id] = socket;
   // TODO: cambiar la dependencia de la accion al game service (o el game service a la altura de las acciones)
-  createPlayerAction.execute({ id: socket.id, name: socket.id, worldMapId: "world" });
-  socket.join("world");
+  createPlayerAction.execute({ id: socket.id, name: socket.id, worldMapId: "testMap" });
+  socket.join("testMap");
 
   new RemovePlayerHandler(sockets, socket, removePlayerAction);
   new MovePlayerHandler(socket, movePlayerAction);

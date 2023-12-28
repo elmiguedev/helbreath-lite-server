@@ -112,9 +112,15 @@ export interface TileMapTileset {
 
 export class TiledMap {
   private src: any;
+  private layers: TiledMapLayer[] = [];
 
   constructor(src: any) {
     this.src = src;
+    if (this.src.layers) {
+      this.src.layers.forEach((layer: TiledMapLayerProps) => {
+        this.layers.push(new TiledMapLayer(this, layer));
+      })
+    }
   }
 
   public getGroupLayers(): TiledMapLayer[] {
@@ -130,6 +136,11 @@ export class TiledMap {
       return new TiledMapLayer(this, layer);
     }
   }
+
+  public getLayer(name: string): TiledMapLayer | undefined {
+    return this.layers!.find((layer: TiledMapLayer) => layer.name === name);
+  }
+
 
   public getHeight() {
     return this.src.height;

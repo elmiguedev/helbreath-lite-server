@@ -21,8 +21,8 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         height: 32,
       },
       position: {
-        x: 60,
-        y: 60
+        x: 120,
+        y: 580
       }
     })
   }

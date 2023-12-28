@@ -1,4 +1,4 @@
-import { TiledMapLayer } from "../../utils/TiledMap";
+import { TiledMap, TiledMapLayer } from "../../utils/TiledMap";
 import { Bounds } from "./Bounds";
 import { Portal } from "./Portal";
 import { Position } from "./Position";
@@ -11,17 +11,16 @@ export interface WorldMapProps {
 export class WorldMap {
   public id: string;
   public name: string;
+  private tilemap: TiledMap;
 
-  private layer: TiledMapLayer;
-
-  constructor(props: WorldMapProps, layer: TiledMapLayer) {
+  constructor(props: WorldMapProps, layer: TiledMap) {
     this.id = props.id;
     this.name = props.name;
-    this.layer = layer;
+    this.tilemap = layer;
   }
 
   public isSolidPosition(position: Position): boolean { // TODO: esto deberia devolver otra cosa no un numero
-    const controlLayer = this.layer.getLayer("control");
+    const controlLayer = this.tilemap.getLayer("control");
     if (controlLayer) {
       const tile = controlLayer.getTileFromPosition(position.x, position.y);
       if (tile && tile.properties.some(prop => prop.name === 'solid' && prop.value === true)) {
@@ -32,7 +31,7 @@ export class WorldMap {
   }
 
   public getPortalFromPosition(position: Position): Portal | undefined {
-    const objectsLayer = this.layer.getLayer("objects");
+    const objectsLayer = this.tilemap.getLayer("objects");
     if (objectsLayer) {
       const object = objectsLayer.getObjectFromPosition(position.x, position.y);
       if (object && object.type === "portal") {

@@ -1,7 +1,8 @@
 import { WorldMap } from "../../domain/entities/WorldMap";
 import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
 import { TiledMap, TiledMapLayer } from "../../utils/TiledMap";
-import MapJson from "../data/maps.json";
+
+import TestMapJson from "../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";
 
 export class InMemoryWorldMapRepository implements WorldMapRepository {
   private tiledMaps: TiledMap;
@@ -9,19 +10,18 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
 
   constructor() {
     this.worldMaps = new Map();
-    this.tiledMaps = new TiledMap(MapJson);
+    this.tiledMaps = new TiledMap(TestMapJson);
     this.createWorldMaps();
   }
 
   private createWorldMaps() {
-    const layers = this.tiledMaps.getGroupLayers();
-    layers.forEach(layer => {
-      const worldMap = new WorldMap({
-        id: layer.name,
-        name: layer.name,
-      }, layer);
-      this.worldMaps.set(worldMap.id, worldMap);
-    });
+    // crea uno por uno los mapas
+    const testMap = new WorldMap({
+      id: "testMap",
+      name: "testMap",
+    }, new TiledMap(TestMapJson));
+
+    this.worldMaps.set(testMap.id, testMap);
   }
 
   public getAll(): WorldMap[] {
@@ -39,7 +39,7 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
   public getSolidLayerById(id: string): TiledMapLayer | undefined {
     const worldMapLayer = this.tiledMaps.getGroupLayer(id);
     if (worldMapLayer) {
-      return worldMapLayer.getLayer("solid");
+      return worldMapLayer.getLayer("control");
     }
   }
 

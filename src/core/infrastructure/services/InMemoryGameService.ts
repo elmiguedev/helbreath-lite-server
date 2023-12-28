@@ -8,7 +8,7 @@ import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
 import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
-import { GAME_LOOP_INTERVAL } from "../../utils/Constants";
+import { GAME_LOOP_INTERVAL, PLAYER_MAX_SPEED } from "../../utils/Constants";
 import { MathUtils } from "../../utils/MathUtils";
 
 export class InMemoryGameService implements GameService {
@@ -80,40 +80,16 @@ export class InMemoryGameService implements GameService {
 
   private updatePlayerPositionLinealStartegy(player: Player, worldMap: WorldMap): void {
     if (player.target) {
-
-      if (player.target === player.position) return;
-
-      const MAX_SPEED = 4;
       const distance = Math.sqrt(Math.pow(player.target.x - player.position.x, 2) + Math.pow(player.target.y - player.position.y, 2));
-      if (distance <= MAX_SPEED) {
+      if (distance <= PLAYER_MAX_SPEED) {
         player.position = player.target;
         player.target = undefined;
       } else {
 
-        // const cos = (player.target.x - player.position.x) / distance;
-        // const sin = (player.target.y - player.position.y) / distance;
-        // const max_x_speed = MAX_SPEED * cos;
-        // const max_y_speed = MAX_SPEED * sin;
-        // const x = player.position.x + max_x_speed;
-        // const y = player.position.y + max_y_speed;
-
-        // const x = MathUtils.lerp(player.position.x, player.target.x, 0.01, 450);
-        // const y = MathUtils.lerp(player.position.y, player.target.y, 0.01, 450);
-
-
-        const newPosition = MathUtils.constantLerp(player.position.x, player.position.y, player.target.x, player.target.y, MAX_SPEED);
+        const newPosition = MathUtils.constantLerp(player.position.x, player.position.y, player.target.x, player.target.y, PLAYER_MAX_SPEED);
         const x = newPosition.x;
         const y = newPosition.y;
 
-
-        // Logica para ver si esta colisionando o no
-        // if top or bottom -> stop y, advance x
-        // if left or right -> stop x, advance y
-
-        // recorre todos los pixeles top
-        // const collisions = this.getPlayerCollisionSide({ x, y }, player, worldMap);
-        // const finalX = collisions.includes("top") || collisions.includes("bottom") ? player.position.x : x;
-        // const finalY = collisions.includes("left") || collisions.includes("right") ? player.position.y : y;
 
         let finalX = x;
         let finalY = y;
@@ -144,13 +120,6 @@ export class InMemoryGameService implements GameService {
         }
 
         player.position = { x: finalX, y: finalY };
-
-        // if (worldMap.isSolidPosition({ x, y })) {
-        //   player.position = { x: player.position.x, y: player.position.y };
-        // } else {
-        //   player.position = { x, y };
-        // }
-
       }
     }
   }
@@ -158,7 +127,7 @@ export class InMemoryGameService implements GameService {
   private isTopColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
       const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y - 4 - player.bounds.height / 2;
+      const pixelY = newPosition.y - PLAYER_MAX_SPEED - player.bounds.height / 2;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
       }
@@ -169,7 +138,7 @@ export class InMemoryGameService implements GameService {
   private isBottomColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
       const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y + 4 + player.bounds.height / 2;
+      const pixelY = newPosition.y + PLAYER_MAX_SPEED + player.bounds.height / 2;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
       }
@@ -182,7 +151,7 @@ export class InMemoryGameService implements GameService {
     // una restriccion es que no puede existir un tile que sea mas chico que el ancho del hitbox del player:
     // o sea, el hitbox del player no puede ser mayor a un tile
     for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x - 4 - player.bounds.width / 2);
+      const pixelX = (newPosition.x - PLAYER_MAX_SPEED - player.bounds.width / 2);
       const pixelY = (newPosition.y - player.bounds.height / 2) + i;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
@@ -193,7 +162,7 @@ export class InMemoryGameService implements GameService {
 
   private isRightColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x + 4 + player.bounds.width / 2);
+      const pixelX = (newPosition.x + PLAYER_MAX_SPEED + player.bounds.width / 2);
       const pixelY = (newPosition.y - player.bounds.height / 2) + i;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
