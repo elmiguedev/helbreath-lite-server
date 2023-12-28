@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { RemovePlayerAction } from "../../../core/actions/players/RemovePlayerAction";
+import { RemovePlayerAction } from "../../../core/interactions/actions/players/RemovePlayerAction";
 
 export const REMOVE_PLAYER_MESSAGE = "disconnect";
 

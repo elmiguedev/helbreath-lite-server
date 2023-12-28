@@ -1,4 +1,4 @@
-import { GameService } from "../../domain/services/GameService";
+import { GameService } from "../../../domain/services/GameService";
 import { Action } from "../Action";
 
 export class StartGameAction implements Action<void, void> {

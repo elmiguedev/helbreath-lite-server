@@ -1,4 +1,4 @@
-import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
+import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { Action } from "../Action";
 
 export interface RemovePlayerActionParams {

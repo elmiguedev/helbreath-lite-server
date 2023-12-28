@@ -2,19 +2,18 @@ import express from "express";
 import { createServer } from "node:http";
 import { Socket, Server as SocketServer } from "socket.io";
 import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/InMemoryPlayerRepository";
-import { CreatePlayerAction } from "./core/actions/players/CreatePlayerAction";
-import { RemovePlayerAction } from "./core/actions/players/RemovePlayerAction";
-import { UpdatePlayersPositionsAction } from "./core/actions/players/UpdatePlayersPositionsAction";
-import { MovePlayerAction } from "./core/actions/players/MovePlayerAction";
+import { CreatePlayerAction } from "./core/interactions/actions/players/CreatePlayerAction";
+import { RemovePlayerAction } from "./core/interactions/actions/players/RemovePlayerAction";
+import { MovePlayerAction } from "./core/interactions/actions/players/MovePlayerAction";
 import { MovePlayerHandler } from "./delivery/sockets/handlers/MovePlayerHandler";
 import { RemovePlayerHandler } from "./delivery/sockets/handlers/RemovePlayerHandler";
 import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/InMemoryWorldMapRepository";
 import { InMemoryGameService } from "./core/infrastructure/services/InMemoryGameService";
-import { PortalCollisionListener } from "./core/listeners/PortalCollisionListener";
-import { WorldMapTickListener } from "./core/listeners/WorldMapTickListener";
+import { PortalCollisionListener } from "./core/interactions/listeners/PortalCollisionListener";
+import { WorldMapTickListener } from "./core/interactions/listeners/WorldMapTickListener";
 import { WorldStatusNotifier } from "./delivery/sockets/notifiers/WorldStatusNotifier";
 import { PortalCollisionNotifier } from "./delivery/sockets/notifiers/PortalCollisionNotifier";
-import { StartGameAction } from "./core/actions/game/StartGameAction";
+import { StartGameAction } from "./core/interactions/actions/game/StartGameAction";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
