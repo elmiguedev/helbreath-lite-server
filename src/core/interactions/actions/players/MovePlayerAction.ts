@@ -1,5 +1,5 @@
-import { Position } from "../../domain/entities/Position";
-import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
+import { Position } from "../../../domain/entities/Position";
+import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { Action } from "../Action";
 
 export interface MovePlayerActionParams {

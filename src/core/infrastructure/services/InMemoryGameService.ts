@@ -4,11 +4,11 @@ import { Position } from "../../domain/entities/Position";
 import { WorldMap } from "../../domain/entities/WorldMap";
 import { WorldMapChange } from "../../domain/entities/WorldMapChange";
 import { WorldStatus } from "../../domain/entities/WorldStatus";
-import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
-import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
+import { PlayerRepository } from "../../domain/repositories/PlayerRepository";
+import { WorldMapRepository } from "../../domain/repositories/WorldMapRepository";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
-import { GAME_LOOP_INTERVAL, PLAYER_MAX_SPEED } from "../../utils/Constants";
+import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED } from "../../utils/Constants";
 import { MathUtils } from "../../utils/MathUtils";
 
 export class InMemoryGameService implements GameService {
@@ -24,12 +24,11 @@ export class InMemoryGameService implements GameService {
   }
 
   public start() {
-    const worldMaps = this.getWorldMaps();
-    worldMaps.forEach(worldMap => {
+    this.worldMapRepository.getAll().forEach(worldMap => {
       this.gameLoopTimers[worldMap.id] = setInterval(() => {
 
         // updateamos posiciones
-        this.updatePlayersPositions(worldMap);
+        this.updatePlayers(worldMap);
 
         // actualiza el estado de cada sala
         this.notifyWorldTickListeners(worldMap);
@@ -38,96 +37,37 @@ export class InMemoryGameService implements GameService {
     });
   }
 
-  private getWorldMaps() {
-    return this.worldMapRepository.getAll();
-  }
-
-  // players positions
-
-  private updatePlayersPositions(worldMap: WorldMap) { // TODO: cambiar nombre por solo update
+  private updatePlayers(worldMap: WorldMap) {
     const players = this.playerRepository.getPlayersByWorldMap(worldMap.id);
     players.forEach(player => {
 
       // update player movement
-      if (player.target) {
-        this.updatePlayerPositionLinealStartegy(player, worldMap);
-        this.playerRepository.updatePlayer(player);
-      }
+      this.updatePlayerPosition(player, worldMap);
 
       // check portal
-      const portal = worldMap.getPortalFromPosition(player.position);
-      if (portal) {
-        player.target = undefined;
-        player.worldMapId = portal.targetWorldMapId;
-        player.position = portal.targetPosition;
-        this.playerRepository.updatePlayer(player);
-        this.notifyPortalCollisionListeners([{
-          fromWorldMapId: portal.worldMapId,
-          toWorldMapId: portal.targetWorldMapId,
-          playerId: player.id
-        }]);
-      }
+      this.checkPortalCollision(player, worldMap);
     });
   }
 
-  private updatePlayerPositionLerpStrategy(player: Player, worldMap: WorldMap): void {
+  private updatePlayerPosition(player: Player, worldMap: WorldMap): void {
     if (player.target) {
-      const x = MathUtils.lerp(player.position.x, player.target.x, 1);
-      const y = MathUtils.lerp(player.position.y, player.target.y, 1);
-      player.position = { x, y };
-    }
-  }
+      const distance = MathUtils.getDistanceBetween(player.position, player.target);
 
-  private updatePlayerPositionLinealStartegy(player: Player, worldMap: WorldMap): void {
-    if (player.target) {
-      const distance = Math.sqrt(Math.pow(player.target.x - player.position.x, 2) + Math.pow(player.target.y - player.position.y, 2));
-      if (distance <= PLAYER_MAX_SPEED) {
+      if (distance <= MAX_PLAYER_SPEED) {
         player.position = player.target;
         player.target = undefined;
-      } else {
-
-        const newPosition = MathUtils.constantLerp(player.position.x, player.position.y, player.target.x, player.target.y, PLAYER_MAX_SPEED);
-        const x = newPosition.x;
-        const y = newPosition.y;
-
-
-        let finalX = x;
-        let finalY = y;
-
-        const isLeftColliding = this.isLeftColliding({ x, y }, player, worldMap);
-        const isRightColliding = this.isRightColliding({ x, y }, player, worldMap);
-        const isBottomColliding = this.isBottomColliding({ x, y }, player, worldMap);
-        const isTopColliding = this.isTopColliding({ x, y }, player, worldMap);
-
-        if (isLeftColliding && x < player.position.x) {
-          console.log("controlo left")
-          finalX = player.position.x;
-        }
-
-        if (isRightColliding && x > player.position.x) {
-          console.log("controlo right")
-          finalX = player.position.x;
-        }
-
-        if (isTopColliding && y < player.position.y) {
-          console.log("controlo top")
-          finalY = player.position.y;
-        }
-
-        if (isBottomColliding && y > player.position.y) {
-          console.log("controlo bottom")
-          finalY = player.position.y;
-        }
-
-        player.position = { x: finalX, y: finalY };
+        return;
       }
+
+      player.position = this.getNewPlayerPosition(player, worldMap);
+      this.playerRepository.updatePlayer(player);
     }
   }
 
   private isTopColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
       const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y - PLAYER_MAX_SPEED - player.bounds.height / 2;
+      const pixelY = newPosition.y - MAX_PLAYER_SPEED - player.bounds.height / 2;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
       }
@@ -138,7 +78,7 @@ export class InMemoryGameService implements GameService {
   private isBottomColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
       const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y + PLAYER_MAX_SPEED + player.bounds.height / 2;
+      const pixelY = newPosition.y + MAX_PLAYER_SPEED + player.bounds.height / 2;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
       }
@@ -151,7 +91,7 @@ export class InMemoryGameService implements GameService {
     // una restriccion es que no puede existir un tile que sea mas chico que el ancho del hitbox del player:
     // o sea, el hitbox del player no puede ser mayor a un tile
     for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x - PLAYER_MAX_SPEED - player.bounds.width / 2);
+      const pixelX = (newPosition.x - MAX_PLAYER_SPEED - player.bounds.width / 2);
       const pixelY = (newPosition.y - player.bounds.height / 2) + i;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
@@ -162,7 +102,7 @@ export class InMemoryGameService implements GameService {
 
   private isRightColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
     for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x + PLAYER_MAX_SPEED + player.bounds.width / 2);
+      const pixelX = (newPosition.x + MAX_PLAYER_SPEED + player.bounds.width / 2);
       const pixelY = (newPosition.y - player.bounds.height / 2) + i;
       if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
         return true;
@@ -172,50 +112,46 @@ export class InMemoryGameService implements GameService {
     return false;
   }
 
+  private getNewPlayerPosition(player: Player, worldMap: WorldMap): Position {
+    if (!player.target) return player.position;
 
+    const calculatedPosition = MathUtils.constantLerp(player.position.x, player.position.y, player.target.x, player.target.y, MAX_PLAYER_SPEED);
+    const isLeftColliding = this.isLeftColliding(calculatedPosition, player, worldMap);
+    const isRightColliding = this.isRightColliding(calculatedPosition, player, worldMap);
+    const isBottomColliding = this.isBottomColliding(calculatedPosition, player, worldMap);
+    const isTopColliding = this.isTopColliding(calculatedPosition, player, worldMap);
 
-  // portals collisions
+    const newPosition = calculatedPosition;
 
-  // private checkPortalsCollisions(worldMap: WorldMap) {
+    if (isLeftColliding && calculatedPosition.x < player.position.x)
+      newPosition.x = player.position.x;
 
-  //   const portals = worldMap.portals || [];
-  //   const players = this.playerRepository.getPlayersByWorldMap(worldMap.id);
-  //   const changes: WorldMapChange[] = [];
+    if (isRightColliding && calculatedPosition.x > player.position.x)
+      newPosition.x = player.position.x;
 
-  //   for (let i = 0; i < players.length; i++) {
-  //     const player = players[i];
+    if (isTopColliding && calculatedPosition.y < player.position.y)
+      newPosition.y = player.position.y;
 
-  //     for (let p = 0; p < portals.length; p++) {
-  //       const portal = portals[p];
-  //       if (this.isInPortal(portal, player)) {
-  //         player.worldMapId = portal.targetWorldMapId;
-  //         player.position = portal.targetPosition;
-  //         player.target = portal.targetPosition;
-  //         this.playerRepository.updatePlayer(player);
+    if (isBottomColliding && calculatedPosition.y > player.position.y)
+      newPosition.y = player.position.y;
 
-  //         changes.push({
-  //           playerId: player.id,
-  //           fromWorldMapId: worldMap.id,
-  //           toWorldMapId: portal.targetWorldMapId,
-  //         });
-  //         break;
-  //       }
-  //     }
+    return newPosition;
+  }
 
-  //   }
-
-  //   // Aca iria un notify para reemplazar lo de abajo
-  //   this.notifyPortalCollisionListeners(changes);
-  // }
-
-  // private isInPortal(portal: Portal, player: Player): boolean {
-  //   return (
-  //     player.position.x > portal.position.x &&
-  //     player.position.y > portal.position.y &&
-  //     player.position.x < portal.position.x + portal.size.width &&
-  //     player.position.y < portal.position.y + portal.size.height
-  //   );
-  // }
+  private checkPortalCollision(player: Player, worldMap: WorldMap) {
+    const portal = worldMap.getPortalFromPosition(player.position);
+    if (portal) {
+      player.target = undefined;
+      player.worldMapId = portal.targetWorldMapId;
+      player.position = portal.targetPosition;
+      this.playerRepository.updatePlayer(player);
+      this.notifyPortalCollisionListeners([{
+        fromWorldMapId: portal.worldMapId,
+        toWorldMapId: portal.targetWorldMapId,
+        playerId: player.id
+      }]);
+    }
+  }
 
   // listeners
   private notifyWorldTickListeners(worldMap: WorldMap) {

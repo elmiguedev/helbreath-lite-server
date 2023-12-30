@@ -1,5 +1,5 @@
-import { WorldMap } from "../../domain/entities/WorldMap";
-import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
+import { WorldMap } from "../../../domain/entities/WorldMap";
+import { WorldMapRepository } from "../../../domain/repositories/WorldMapRepository";
 import { Action } from "../Action";
 
 export class GetWorldMapAction implements Action<string, WorldMap | undefined> {

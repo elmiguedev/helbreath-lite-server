@@ -1,3 +1,5 @@
+import { Position } from "../domain/entities/Position";
+
 const getRandomBetween = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 }
@@ -27,8 +29,13 @@ const constantLerp = (currentX: number, currentY: number, targetX: number, targe
   return { x: newX, y: newY };
 };
 
+const getDistanceBetween = (position: Position, target: Position) => {
+  return Math.sqrt(Math.pow(position.x - target.x, 2) + Math.pow(position.y - target.y, 2));
+}
+
 export const MathUtils = {
   getRandomBetween,
   lerp,
-  constantLerp
+  constantLerp,
+  getDistanceBetween
 }

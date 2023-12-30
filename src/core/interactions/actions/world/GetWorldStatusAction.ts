@@ -1,6 +1,6 @@
-import { WorldStatus } from "../../domain/entities/WorldStatus";
-import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
-import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
+import { WorldStatus } from "../../../domain/entities/WorldStatus";
+import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
+import { WorldMapRepository } from "../../../domain/repositories/WorldMapRepository";
 import { Action } from "../Action";
 
 export class GetWorldStatusAction implements Action<string, WorldStatus> {

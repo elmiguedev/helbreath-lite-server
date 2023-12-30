@@ -1,5 +1,5 @@
 import { WorldMap } from "../../domain/entities/WorldMap";
-import { WorldMapRepository } from "../../domain/respositories/WorldMapRepository";
+import { WorldMapRepository } from "../../domain/repositories/WorldMapRepository";
 import { TiledMap, TiledMapLayer } from "../../utils/TiledMap";
 
 import TestMapJson from "../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";

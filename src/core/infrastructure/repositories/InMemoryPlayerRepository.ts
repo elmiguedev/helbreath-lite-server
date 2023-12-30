@@ -1,5 +1,5 @@
 import { Player } from "../../domain/entities/Player";
-import { PlayerRepository } from "../../domain/respositories/PlayerRepository";
+import { PlayerRepository } from "../../domain/repositories/PlayerRepository";
 
 export class InMemoryPlayerRepository implements PlayerRepository {
 
