@@ -1,15 +1,17 @@
-import { Player } from "../../domain/entities/Player";
-import { Position } from "../../domain/entities/Position";
+import { Player } from "../../domain/entities/player/Player";
+import { Position } from "../../domain/entities/generic/Position";
 
-import { WorldMap } from "../../domain/entities/WorldMap";
-import { WorldMapChange } from "../../domain/entities/WorldMapChange";
-import { WorldStatus } from "../../domain/entities/WorldStatus";
+import { WorldMap } from "../../domain/entities/world/WorldMap";
+import { WorldMapChange } from "../../domain/entities/world/WorldMapChange";
+import { WorldStatus } from "../../domain/entities/world/WorldStatus";
 import { PlayerRepository } from "../../domain/repositories/PlayerRepository";
 import { WorldMapRepository } from "../../domain/repositories/WorldMapRepository";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED } from "../../utils/Constants";
-import { MathUtils } from "../../utils/MathUtils";
+import { MathUtils, xor } from "../../utils/MathUtils";
+
+import p2 from "p2";
 
 export class InMemoryGameService implements GameService {
   private gameLoopTimers: Record<string, any>;
@@ -18,18 +20,21 @@ export class InMemoryGameService implements GameService {
 
   constructor(
     private readonly playerRepository: PlayerRepository,
-    private readonly worldMapRepository: WorldMapRepository
+    private readonly worldMapRepository: WorldMapRepository,
+    private readonly world: p2.World
   ) {
     this.gameLoopTimers = {};
   }
 
   public start() {
+
     this.worldMapRepository.getAll().forEach(worldMap => {
       this.gameLoopTimers[worldMap.id] = setInterval(() => {
 
         // updateamos posiciones
-        this.updatePlayers(worldMap);
+        // this.updatePlayers(worldMap);
 
+        this.world.step(GAME_LOOP_INTERVAL / 1000);
         // actualiza el estado de cada sala
         this.notifyWorldTickListeners(worldMap);
 
@@ -45,7 +50,7 @@ export class InMemoryGameService implements GameService {
       this.updatePlayerPosition(player, worldMap);
 
       // check portal
-      this.checkPortalCollision(player, worldMap);
+      // this.checkPortalCollision(player, worldMap);
     });
   }
 
@@ -64,100 +69,48 @@ export class InMemoryGameService implements GameService {
     }
   }
 
-  private isTopColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
-    for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y - MAX_PLAYER_SPEED - player.bounds.height / 2;
-      if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isBottomColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
-    for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x - player.bounds.width / 2) + i;
-      const pixelY = newPosition.y + MAX_PLAYER_SPEED + player.bounds.height / 2;
-      if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isLeftColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
-    // NOTA: esto se puede optimizar solo validando los puntos extremos y no todo el bloque. PEEEERO, la 
-    // una restriccion es que no puede existir un tile que sea mas chico que el ancho del hitbox del player:
-    // o sea, el hitbox del player no puede ser mayor a un tile
-    for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x - MAX_PLAYER_SPEED - player.bounds.width / 2);
-      const pixelY = (newPosition.y - player.bounds.height / 2) + i;
-      if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isRightColliding(newPosition: Position, player: Player, worldMap: WorldMap): boolean {
-    for (let i = 0; i < player.bounds.width; i++) {
-      const pixelX = (newPosition.x + MAX_PLAYER_SPEED + player.bounds.width / 2);
-      const pixelY = (newPosition.y - player.bounds.height / 2) + i;
-      if (worldMap.isSolidPosition({ x: pixelX, y: pixelY })) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   private getNewPlayerPosition(player: Player, worldMap: WorldMap): Position {
     if (!player.target) return player.position;
 
     const calculatedPosition = MathUtils.constantLerp(player.position.x, player.position.y, player.target.x, player.target.y, MAX_PLAYER_SPEED);
-    const isLeftColliding = this.isLeftColliding(calculatedPosition, player, worldMap);
-    const isRightColliding = this.isRightColliding(calculatedPosition, player, worldMap);
-    const isBottomColliding = this.isBottomColliding(calculatedPosition, player, worldMap);
-    const isTopColliding = this.isTopColliding(calculatedPosition, player, worldMap);
-
     const newPosition = calculatedPosition;
 
-    if (isLeftColliding && calculatedPosition.x < player.position.x)
-      newPosition.x = player.position.x;
-
-    if (isRightColliding && calculatedPosition.x > player.position.x)
-      newPosition.x = player.position.x;
-
-    if (isTopColliding && calculatedPosition.y < player.position.y)
-      newPosition.y = player.position.y;
-
-    if (isBottomColliding && calculatedPosition.y > player.position.y)
-      newPosition.y = player.position.y;
+    for (let i = 0; i < worldMap.solids.length; i++) {
+      const solidBlock = worldMap.solids[i];
+      const overlapping = MathUtils.isOverlapping(newPosition, player.bounds, solidBlock.position, solidBlock.size);
+      if (overlapping) {
+        newPosition.x = player.position.x;
+        newPosition.y = player.position.y;
+        player.target = undefined;
+      }
+    }
 
     return newPosition;
   }
 
-  private checkPortalCollision(player: Player, worldMap: WorldMap) {
-    const portal = worldMap.getPortalFromPosition(player.position);
-    if (portal) {
-      player.target = undefined;
-      player.worldMapId = portal.targetWorldMapId;
-      player.position = portal.targetPosition;
-      this.playerRepository.updatePlayer(player);
-      this.notifyPortalCollisionListeners([{
-        fromWorldMapId: portal.worldMapId,
-        toWorldMapId: portal.targetWorldMapId,
-        playerId: player.id
-      }]);
-    }
-  }
+  // private checkPortalCollision(player: Player, worldMap: WorldMap) {
+  //   const portal = worldMap.getPortalFromPosition(player.position);
+  //   if (portal) {
+  //     player.target = undefined;
+  //     player.worldMapId = portal.targetWorldMapId;
+  //     player.position = portal.targetPosition;
+  //     this.playerRepository.updatePlayer(player);
+  //     this.notifyPortalCollisionListeners([{
+  //       fromWorldMapId: portal.worldMapId,
+  //       toWorldMapId: portal.targetWorldMapId,
+  //       playerId: player.id
+  //     }]);
+  //   }
+  // }
 
   // listeners
   private notifyWorldTickListeners(worldMap: WorldMap) {
     this.worldMapTickListeners.forEach(listener => {
       const worldStatus: WorldStatus = {
-        world: worldMap.getStatus(),
+        world: {
+          id: worldMap.id,
+          name: worldMap.name
+        },
         players: this.playerRepository.getPlayersByWorldMap(worldMap.id),
       }
       listener.notify(worldStatus);

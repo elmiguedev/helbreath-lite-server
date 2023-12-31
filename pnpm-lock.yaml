@@ -8,6 +8,9 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
+  p2:
+    specifier: ^0.7.1
+    version: 0.7.1
   socket.io:
     specifier: ^4.7.2
     version: 4.7.2
@@ -22,6 +25,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.10.5
     version: 20.10.5
+  '@types/p2':
+    specifier: ^0.7.44
+    version: 0.7.44
   dotenv:
     specifier: ^16.3.1
     version: 16.3.1
@@ -137,6 +143,10 @@ packages:
     resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
     dependencies:
       undici-types: 5.26.5
+
+  /@types/p2@0.7.44:
+    resolution: {integrity: sha512-EIgtRscxlzwoZmr1/vpyxTb5FVZTe6vJpD4ONciLzmd4M2mfnh8yiz845J0ZIQYdo9+N4NxXAXm6Wk8IhYNqXA==}
+    dev: true
 
   /@types/qs@6.9.10:
     resolution: {integrity: sha512-3Gnx08Ns1sEoCrWssEgTSJs/rsT2vhGP+Ja9cnnk9k4ALxinORlQneLXFeFKOTJMOeZUFD1s7w+w2AphTpvzZw==}
@@ -714,6 +724,12 @@ packages:
       ee-first: 1.1.1
     dev: false
 
+  /p2@0.7.1:
+    resolution: {integrity: sha512-wJxG87tHPlAO1iwGettkiU4ptoytQDoJSeP+PV8aZVT//ZHlD2H2uMtIPnQG8MXAaGR9OI1o1pqBV1g/fpNgNw==}
+    dependencies:
+      poly-decomp: 0.1.1
+    dev: false
+
   /parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
@@ -727,6 +743,10 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
     dev: true
+
+  /poly-decomp@0.1.1:
+    resolution: {integrity: sha512-clSDtuC48FR2PL2z/+VIRhfnxC7776GlJgDNAh1ZIqYOiaGqrINB+xGIWQypLgpz6Z/Ht/w7rTFEGFRNuSPOuA==}
+    dev: false
 
   /proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}

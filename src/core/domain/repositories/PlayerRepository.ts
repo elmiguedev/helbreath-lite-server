@@ -1,4 +1,4 @@
-import { Player } from "../entities/Player";
+import { Player } from "../entities/player/Player";
 
 export interface PlayerRepository {
   addPlayer(player: Player): void;

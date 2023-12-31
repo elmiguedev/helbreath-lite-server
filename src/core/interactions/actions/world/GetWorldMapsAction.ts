@@ -1,4 +1,4 @@
-import { WorldMap } from "../../../domain/entities/WorldMap";
+import { WorldMap } from "../../../domain/entities/world/WorldMap";
 import { WorldMapRepository } from "../../../domain/repositories/WorldMapRepository";
 import { Action } from "../Action";
 

@@ -1,4 +1,4 @@
-import { WorldStatus } from "../../../domain/entities/WorldStatus";
+import { WorldStatus } from "../../../domain/entities/world/WorldStatus";
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { WorldMapRepository } from "../../../domain/repositories/WorldMapRepository";
 import { Action } from "../Action";

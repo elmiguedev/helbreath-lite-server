@@ -16,12 +16,31 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
       id: params.id,
       name: params.name,
       worldMapId: params.worldMapId,
+      attributes: {
+        vitality: 10,
+        charisma: 10,
+        dexterity: 10,
+        strength: 10,
+        intelligence: 10,
+        magic: 10,
+        luck: 10
+      },
       bounds: {
-        width: 32,
-        height: 32,
+        width: 16,
+        height: 16,
+      },
+      stats: {
+        experience: 0,
+        health: 100,
+        level: 1,
+        mana: 100,
+        maxHealth: 100,
+        maxMana: 100,
+        maxStamina: 100,
+        stamina: 100
       },
       position: {
-        x: 120,
+        x: 620,
         y: 580
       }
     })

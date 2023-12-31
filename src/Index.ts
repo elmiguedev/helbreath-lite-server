@@ -14,13 +14,16 @@ import { WorldMapTickListener } from "./core/interactions/listeners/WorldMapTick
 import { WorldStatusNotifier } from "./delivery/sockets/notifiers/WorldStatusNotifier";
 import { PortalCollisionNotifier } from "./delivery/sockets/notifiers/PortalCollisionNotifier";
 import { StartGameAction } from "./core/interactions/actions/game/StartGameAction";
+import p2 from "p2"
 
 // creamos los repositorios del juego
-const playerRepository = new InMemoryPlayerRepository();
-const worldMapRepository = new InMemoryWorldMapRepository();
+const world = new p2.World({ gravity: [0, 0] });
+
+const playerRepository = new InMemoryPlayerRepository(world);
+const worldMapRepository = new InMemoryWorldMapRepository(world);
 
 // creamos el servicio principal del juego
-const gameService = new InMemoryGameService(playerRepository, worldMapRepository);
+const gameService = new InMemoryGameService(playerRepository, worldMapRepository, world);
 
 // creamos las acciones del juego
 const createPlayerAction = new CreatePlayerAction(playerRepository);

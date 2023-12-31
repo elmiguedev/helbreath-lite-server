@@ -1,6 +1,6 @@
 import { Server as HttpServer } from "node:http";
 import { Server as Server, Socket } from "socket.io";
-import { Player } from "../../core/domain/entities/Player";
+import { Player } from "../../core/domain/entities/player/Player";
 
 export class SocketServer {
   // private socketServer: Server;

@@ -1,4 +1,4 @@
-import { WorldMapChange } from "../entities/WorldMapChange";
+import { WorldMapChange } from "../entities/world/WorldMapChange";
 import { GameServiceListener } from "./GameServiceListener";
 
 export interface GameService {

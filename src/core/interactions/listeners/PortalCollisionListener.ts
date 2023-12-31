@@ -1,4 +1,4 @@
-import { WorldMapChange } from "../../domain/entities/WorldMapChange";
+import { WorldMapChange } from "../../domain/entities/world/WorldMapChange";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 

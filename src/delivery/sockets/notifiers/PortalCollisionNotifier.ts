@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { GameServiceListener } from "../../../core/domain/services/GameServiceListener";
-import { WorldMapChange } from "../../../core/domain/entities/WorldMapChange";
+import { WorldMapChange } from "../../../core/domain/entities/world/WorldMapChange";
 
 export class PortalCollisionNotifier implements GameServiceListener {
 

@@ -80,6 +80,30 @@ export class TiledMapLayer {
     }
   }
 
+  // TODO: refactor, hacer que sea por id o por prop,
+  public getExistingTiles() {
+    const tileSize = 16;
+    const tiles = [];
+
+    for (let i = 0; i < this.data!.length; i++) {
+      const tileData = this.data![i];
+      if (tileData > 0) {
+        const tileX = (i % this.tilemap.getWidth()) * tileSize;
+        const tileY = Math.floor(i / this.tilemap.getWidth()) * tileSize;
+        tiles.push({
+          x: tileX,
+          y: tileY,
+          width: tileSize,
+          height: tileSize
+        })
+      }
+    }
+
+    console.log(tiles);
+
+    return tiles;
+  }
+
   public getTileFromPosition(x: number, y: number) {
     const currentTile = Math.floor(x / this.tilemap.getTileWidth()) + Math.floor(y / this.tilemap.getTileHeight()) * this.tilemap.getWidth();
     const tileId = this.data![currentTile];

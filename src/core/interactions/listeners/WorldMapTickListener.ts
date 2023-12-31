@@ -1,4 +1,4 @@
-import { WorldStatus } from "../../domain/entities/WorldStatus";
+import { WorldStatus } from "../../domain/entities/world/WorldStatus";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 
