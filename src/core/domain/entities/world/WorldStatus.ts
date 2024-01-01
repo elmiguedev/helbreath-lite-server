@@ -1,7 +1,8 @@
+import { Monster } from "../monster/Monster";
 import { Player } from "../player/Player";
-import { WorldMap, WorldMapProps } from "./WorldMap";
 
 export interface WorldStatus {
-  world: WorldMapProps;
+  world: any;
   players: Player[];
+  monsters: Monster[];
 }

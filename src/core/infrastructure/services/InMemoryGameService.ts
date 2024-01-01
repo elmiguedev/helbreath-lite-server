@@ -10,11 +10,31 @@ import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED } from "../../utils/Constants";
 import { MathUtils, xor } from "../../utils/MathUtils";
+import { Monster } from "../../domain/entities/monster/Monster";
 
 export class InMemoryGameService implements GameService {
   private gameLoopTimers: Record<string, any>;
   private worldMapTickListeners: GameServiceListener[] = [];
   private portalCollisionListener: GameServiceListener[] = [];
+
+  private monsters: Monster[] = [{
+    id: '1',
+    damage: 10,
+    defenseRatio: 0.5,
+    health: 100,
+    hitRatio: 0.5,
+    name: 'dummy',
+    type: 'dummy',
+    worldMapId: 'test',
+    position: {
+      x: 600,
+      y: 900
+    },
+    size: {
+      width: 16,
+      height: 16
+    }
+  }];
 
   constructor(
     private readonly playerRepository: PlayerRepository,
@@ -113,6 +133,7 @@ export class InMemoryGameService implements GameService {
           name: worldMap.name
         },
         players: this.playerRepository.getPlayersByWorldMap(worldMap.id),
+        monsters: this.monsters
       }
       listener.notify(worldStatus);
     });
