@@ -34,31 +34,11 @@ const getDistanceBetween = (position: Position, target: Position) => {
   return Math.sqrt(Math.pow(position.x - target.x, 2) + Math.pow(position.y - target.y, 2));
 }
 
-export interface Overlapping {
-  top: boolean;
-  bottom: boolean;
-  left: boolean;
-  right: boolean;
-}
-const isOverlapping = (entityPosition: Position, entitySize: Size, targetPosition: Position, targetSize: Size): Overlapping | undefined => {
-  if (entityPosition.x < targetPosition.x + targetSize.width &&
+const isOverlapping = (entityPosition: Position, entitySize: Size, targetPosition: Position, targetSize: Size): boolean => {
+  return entityPosition.x < targetPosition.x + targetSize.width &&
     entityPosition.x + entitySize.width > targetPosition.x &&
     entityPosition.y < targetPosition.y + targetSize.height &&
     entityPosition.y + entitySize.height > targetPosition.y
-  ) {
-    const overlapping: Overlapping = {
-      top: false,
-      bottom: false,
-      left: false,
-      right: false
-    }
-    if (entityPosition.x + entitySize.width > targetPosition.x && (entityPosition.x + entitySize.width - targetPosition.x < targetSize.width)) overlapping.right = true;
-    if (entityPosition.x < targetPosition.x + targetSize.width && (targetPosition.x + targetSize.width - entityPosition.x < targetSize.width)) overlapping.left = true;
-    if (entityPosition.y + entitySize.height > targetPosition.y && (entityPosition.y + entitySize.height - targetPosition.y < targetSize.height)) overlapping.bottom = true;
-    if (entityPosition.y < targetPosition.y + targetSize.height && (targetPosition.y + targetSize.height - entityPosition.y < targetSize.height)) overlapping.top = true;
-    return overlapping;
-  }
-  return undefined;
 }
 
 export const xor = (a: boolean, b: boolean) => {

@@ -11,8 +11,6 @@ import { GameServiceListener } from "../../domain/services/GameServiceListener";
 import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED } from "../../utils/Constants";
 import { MathUtils, xor } from "../../utils/MathUtils";
 
-import p2 from "p2";
-
 export class InMemoryGameService implements GameService {
   private gameLoopTimers: Record<string, any>;
   private worldMapTickListeners: GameServiceListener[] = [];
@@ -21,7 +19,6 @@ export class InMemoryGameService implements GameService {
   constructor(
     private readonly playerRepository: PlayerRepository,
     private readonly worldMapRepository: WorldMapRepository,
-    private readonly world: p2.World
   ) {
     this.gameLoopTimers = {};
   }
@@ -32,9 +29,8 @@ export class InMemoryGameService implements GameService {
       this.gameLoopTimers[worldMap.id] = setInterval(() => {
 
         // updateamos posiciones
-        // this.updatePlayers(worldMap);
+        this.updatePlayers(worldMap);
 
-        this.world.step(GAME_LOOP_INTERVAL / 1000);
         // actualiza el estado de cada sala
         this.notifyWorldTickListeners(worldMap);
 
@@ -77,11 +73,14 @@ export class InMemoryGameService implements GameService {
 
     for (let i = 0; i < worldMap.solids.length; i++) {
       const solidBlock = worldMap.solids[i];
-      const overlapping = MathUtils.isOverlapping(newPosition, player.bounds, solidBlock.position, solidBlock.size);
-      if (overlapping) {
+      const xCalculated = MathUtils.constantLerp(player.position.x, player.position.y, player.target!.x, player.position.y, MAX_PLAYER_SPEED);
+      if (MathUtils.isOverlapping(xCalculated, player.bounds, solidBlock.position, solidBlock.size)) {
         newPosition.x = player.position.x;
-        newPosition.y = player.position.y;
-        player.target = undefined;
+      } else {
+        const yCalculated = MathUtils.constantLerp(player.position.x, player.position.y, player.position.x, player.target!.y, MAX_PLAYER_SPEED);
+        if (MathUtils.isOverlapping(yCalculated, player.bounds, solidBlock.position, solidBlock.size)) {
+          newPosition.y = player.position.y;
+        }
       }
     }
 

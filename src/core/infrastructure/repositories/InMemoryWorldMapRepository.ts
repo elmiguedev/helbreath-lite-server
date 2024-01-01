@@ -4,14 +4,12 @@ import { TiledMap, TiledMapLayer } from "../../utils/TiledMap";
 
 import TestMapJson from "../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";
 import { SolidBlock } from "../../domain/entities/world/SolidBlock";
-import p2 from "p2";
-
 
 export class InMemoryWorldMapRepository implements WorldMapRepository {
   private tiledMaps: TiledMap;
   private worldMaps: Map<string, WorldMap>;
 
-  constructor(private readonly world: p2.World) {
+  constructor() {
     this.worldMaps = new Map();
     this.tiledMaps = new TiledMap(TestMapJson);
     this.createWorldMaps();
@@ -46,15 +44,6 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
           }
         };
         testMap.solids.push(solidBlock);
-        const body = new p2.Body({
-          mass: 0,
-          position: [tile.x, tile.y],
-        });
-        body.addShape(new p2.Box({ width: tile.width, height: tile.height }));
-        body.collisionResponse = true
-        body.shapes[0].collisionGroup = 1
-        body.shapes[0].collisionMask = 1
-        this.world.addBody(body);
       });
     }
 
@@ -74,14 +63,5 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
   public getById(id: string): WorldMap | undefined {
     return this.worldMaps.get(id);
   }
-
-  // public getSolidLayerById(id: string): TiledMapLayer | undefined {
-  //   const worldMapLayer = this.tiledMaps.getGroupLayer(id);
-  //   if (worldMapLayer) {
-  //     return worldMapLayer.getLayer("control");
-  //   }
-  // }
-
-
 
 }
