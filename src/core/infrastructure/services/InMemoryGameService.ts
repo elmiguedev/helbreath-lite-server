@@ -46,7 +46,7 @@ export class InMemoryGameService implements GameService {
       this.updatePlayerPosition(player, worldMap);
 
       // check portal
-      // this.checkPortalCollision(player, worldMap);
+      this.checkPortalCollision(player, worldMap);
     });
   }
 
@@ -87,20 +87,22 @@ export class InMemoryGameService implements GameService {
     return newPosition;
   }
 
-  // private checkPortalCollision(player: Player, worldMap: WorldMap) {
-  //   const portal = worldMap.getPortalFromPosition(player.position);
-  //   if (portal) {
-  //     player.target = undefined;
-  //     player.worldMapId = portal.targetWorldMapId;
-  //     player.position = portal.targetPosition;
-  //     this.playerRepository.updatePlayer(player);
-  //     this.notifyPortalCollisionListeners([{
-  //       fromWorldMapId: portal.worldMapId,
-  //       toWorldMapId: portal.targetWorldMapId,
-  //       playerId: player.id
-  //     }]);
-  //   }
-  // }
+  private checkPortalCollision(player: Player, worldMap: WorldMap) {
+    for (const portal of worldMap.portals) {
+      if (MathUtils.isOverlapping(player.position, player.bounds, portal.position, portal.size)) {
+        player.position = portal.target.position;
+        player.target = undefined
+        player.worldMapId = portal.target.worldMapId;
+        this.playerRepository.updatePlayer(player);
+        this.notifyPortalCollisionListeners([{
+          fromWorldMapId: portal.worldMapId,
+          toWorldMapId: portal.target.worldMapId,
+          playerId: player.id
+        }]);
+        return;
+      }
+    }
+  }
 
   // listeners
   private notifyWorldTickListeners(worldMap: WorldMap) {

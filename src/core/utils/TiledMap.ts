@@ -99,8 +99,6 @@ export class TiledMapLayer {
       }
     }
 
-    console.log(tiles);
-
     return tiles;
   }
 
