@@ -8,39 +8,58 @@ import { PlayerRepository } from "../../domain/repositories/PlayerRepository";
 import { WorldMapRepository } from "../../domain/repositories/WorldMapRepository";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
-import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED } from "../../utils/Constants";
-import { MathUtils, xor } from "../../utils/MathUtils";
+import { GAME_LOOP_INTERVAL, MAX_PLAYER_SPEED, PLAYER_MIN_ATTACK_DISTANCE } from "../../utils/Constants";
+import { MathUtils } from "../../utils/MathUtils";
 import { Monster } from "../../domain/entities/monster/Monster";
 
 export class InMemoryGameService implements GameService {
   private gameLoopTimers: Record<string, any>;
-  private worldMapTickListeners: GameServiceListener[] = [];
-  private portalCollisionListener: GameServiceListener[] = [];
 
-  private monsters: Monster[] = [{
-    id: '1',
-    damage: 10,
-    defenseRatio: 0.5,
-    health: 100,
-    hitRatio: 0.5,
-    name: 'dummy',
-    type: 'dummy',
-    worldMapId: 'test',
-    position: {
-      x: 600,
-      y: 900
-    },
-    size: {
-      width: 16,
-      height: 16
-    }
-  }];
+  // entities
+  private players: Record<string, Player>;
+  private monsters: Record<string, Monster>;
+
+  // listeners
+  private worldStatusListener: GameServiceListener[] = [];
+  private playerAttackListener: GameServiceListener[] = [];
+  private playerChangeMapListener: GameServiceListener[] = [];
+  private monsterKilledListener: GameServiceListener[] = [];
+
 
   constructor(
     private readonly playerRepository: PlayerRepository,
     private readonly worldMapRepository: WorldMapRepository,
   ) {
     this.gameLoopTimers = {};
+    this.players = {};
+    this.monsters = {};
+
+    // TODO: borrar cuando se haga la funcionalidad de spawn
+    setInterval(() => {
+      if (Object.keys(this.monsters).length <= 6) {
+        const monster: Monster = {
+          id: MathUtils.getRandomId(),
+          type: "dummy",
+          damage: 1,
+          defenseRatio: 1,
+          health: 100,
+          hitRatio: 1,
+          name: "dummy",
+          position: {
+            x: MathUtils.getRandomBetween(600, 700),
+            y: MathUtils.getRandomBetween(1000, 1100)
+          },
+          size: {
+            width: 16,
+            height: 16
+          },
+          worldMapId: "testMap"
+        };
+
+        this.monsters[monster.id] = monster;
+
+      }
+    }, 10000)
   }
 
   public start() {
@@ -52,14 +71,60 @@ export class InMemoryGameService implements GameService {
         this.updatePlayers(worldMap);
 
         // actualiza el estado de cada sala
-        this.notifyWorldTickListeners(worldMap);
+        this.notifyWorldStatus(worldMap);
 
       }, GAME_LOOP_INTERVAL);
     });
   }
 
+  // players
+  // --------------------------------------
+
+  public addPlayer(player: Player): void {
+    if (!this.players[player.id]) {
+      this.players[player.id] = player;
+    }
+  }
+
+  public getPlayer(playerId: string): Player | undefined {
+    return this.players[playerId];
+  }
+
+  public removePlayer(playerId: string): void {
+    delete this.players[playerId];
+  }
+
+  public addMonster(monster: Monster): void {
+    if (!this.monsters[monster.id]) {
+      this.monsters[monster.id] = monster;
+    }
+  }
+
+  public getMonster(monsterId: string): Monster | undefined {
+    return this.monsters[monsterId];
+  }
+
+  public removeMonster(monsterId: string): Monster | void {
+    const monster = this.monsters[monsterId];
+    if (monster) {
+      delete this.monsters[monsterId];
+      return monster;
+    }
+  }
+
+  public killMonster(monsterId: string): void {
+    const monster = this.removeMonster(monsterId);
+    if (monster) {
+      this.notifyMonsterKilled(monster)
+    }
+  }
+
+  public attack(playerId: string) {
+    this.notifyPlayerAttackListener(playerId);
+  }
+
   private updatePlayers(worldMap: WorldMap) {
-    const players = this.playerRepository.getPlayersByWorldMap(worldMap.id);
+    const players = this.getPlayersByWorldMap(worldMap.id);
     players.forEach(player => {
 
       // update player movement
@@ -68,6 +133,10 @@ export class InMemoryGameService implements GameService {
       // check portal
       this.checkPortalCollision(player, worldMap);
     });
+  }
+
+  private getPlayersByWorldMap(worldMapId: string) {
+    return Object.values(this.players).filter(player => player.worldMapId === worldMapId);
   }
 
   private updatePlayerPosition(player: Player, worldMap: WorldMap): void {
@@ -81,7 +150,6 @@ export class InMemoryGameService implements GameService {
       }
 
       player.position = this.getNewPlayerPosition(player, worldMap);
-      this.playerRepository.updatePlayer(player);
     }
   }
 
@@ -113,8 +181,7 @@ export class InMemoryGameService implements GameService {
         player.position = portal.target.position;
         player.target = undefined
         player.worldMapId = portal.target.worldMapId;
-        this.playerRepository.updatePlayer(player);
-        this.notifyPortalCollisionListeners([{
+        this.notifyPlayerChangeMapListeners([{
           fromWorldMapId: portal.worldMapId,
           toWorldMapId: portal.target.worldMapId,
           playerId: player.id
@@ -125,32 +192,57 @@ export class InMemoryGameService implements GameService {
   }
 
   // listeners
-  private notifyWorldTickListeners(worldMap: WorldMap) {
-    this.worldMapTickListeners.forEach(listener => {
+  public addWorldStatusListener(listener: GameServiceListener) {
+    this.worldStatusListener.push(listener);
+  }
+
+  private notifyWorldStatus(worldMap: WorldMap) {
+    this.worldStatusListener.forEach(listener => {
       const worldStatus: WorldStatus = {
         world: {
           id: worldMap.id,
           name: worldMap.name
         },
-        players: this.playerRepository.getPlayersByWorldMap(worldMap.id),
-        monsters: this.monsters
+        players: Object.values(this.players),
+        monsters: Object.values(this.monsters)
       }
+
       listener.notify(worldStatus);
     });
   }
 
-  private notifyPortalCollisionListeners(changes: WorldMapChange[]) {
-    this.portalCollisionListener.forEach(listener => {
+  public addPlayerAttackListener(listener: GameServiceListener): void {
+    this.playerAttackListener.push(listener);
+  }
+
+  public notifyPlayerAttackListener(playerId: string) {
+    this.playerAttackListener.forEach(listener => {
+      listener.notify({
+        playerId: playerId
+      });
+    });
+  }
+
+  private notifyPlayerChangeMapListeners(changes: WorldMapChange[]) {
+    this.playerChangeMapListener.forEach(listener => {
       listener.notify(changes);
     });
   }
 
-  public addWorldMapTickListener(listener: GameServiceListener) {
-    this.worldMapTickListeners.push(listener);
+  public addPlayerChangeMapListener(listener: GameServiceListener) {
+    this.playerChangeMapListener.push(listener);
   }
 
-  public addPortalCollisionListener(listener: GameServiceListener) {
-    this.portalCollisionListener.push(listener);
+  public addMonsterKilledListener(listener: GameServiceListener) {
+    this.monsterKilledListener.push(listener);
   }
+
+  public notifyMonsterKilled(monster: Monster) {
+    this.monsterKilledListener.forEach(listener => {
+      listener.notify({ monster });
+    });
+  }
+
+
 
 }

@@ -1,21 +1,20 @@
-import { WorldStatus } from "../../domain/entities/world/WorldStatus";
+import { WorldMapChange } from "../../domain/entities/world/WorldMapChange";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 
-export class WorldMapTickListener implements GameServiceListener {
+export class PlayerChangeMapListener implements GameServiceListener {
   private listeners: GameServiceListener[] = [];
 
   constructor(private readonly gameService: GameService) {
-    this.gameService.addWorldMapTickListener(this);
+    this.gameService.addPlayerChangeMapListener(this);
   }
 
-  public notify(worldMapStatus: WorldStatus): void {
+  public notify(changes: WorldMapChange[]): void {
     this.listeners.forEach(listener => {
-      listener.notify(worldMapStatus);
+      listener.notify(changes);
     })
   }
 
-  // TODO: investigar event listener
   public suscribe(listener: GameServiceListener) {
     this.listeners.push(listener);
   }

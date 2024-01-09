@@ -9,11 +9,17 @@ import { MovePlayerHandler } from "./delivery/sockets/handlers/MovePlayerHandler
 import { RemovePlayerHandler } from "./delivery/sockets/handlers/RemovePlayerHandler";
 import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/InMemoryWorldMapRepository";
 import { InMemoryGameService } from "./core/infrastructure/services/InMemoryGameService";
-import { PortalCollisionListener } from "./core/interactions/listeners/PortalCollisionListener";
-import { WorldMapTickListener } from "./core/interactions/listeners/WorldMapTickListener";
+import { PlayerChangeMapListener } from "./core/interactions/listeners/PlayerChangeMapListener";
 import { WorldStatusNotifier } from "./delivery/sockets/notifiers/WorldStatusNotifier";
-import { PortalCollisionNotifier } from "./delivery/sockets/notifiers/PortalCollisionNotifier";
+import { PlayerChangeMapNotifier } from "./delivery/sockets/notifiers/PlayerChangeMapNotifier";
 import { StartGameAction } from "./core/interactions/actions/game/StartGameAction";
+import { MonsterKilledListener } from "./core/interactions/listeners/MonsterKilledListener";
+import { MonsterKilledNotifier } from "./delivery/sockets/notifiers/MonsterKilledNotifier";
+import { PlayerAttackListener } from "./core/interactions/listeners/PlayerAttackListener";
+import { PlayerAttackNotifier } from "./delivery/sockets/notifiers/PlayerAttackNotifier";
+import { WorldStatusListener } from "./core/interactions/listeners/WorldStatusListener";
+import { AttackMonsterAction } from "./core/interactions/actions/players/AttackMonsterAction";
+import { AttackMonsterHandler } from "./delivery/sockets/handlers/AttackMonsterHandler";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
@@ -23,16 +29,22 @@ const worldMapRepository = new InMemoryWorldMapRepository();
 const gameService = new InMemoryGameService(playerRepository, worldMapRepository);
 
 // creamos las acciones del juego
-const createPlayerAction = new CreatePlayerAction(playerRepository);
-const removePlayerAction = new RemovePlayerAction(playerRepository);
-const movePlayerAction = new MovePlayerAction(playerRepository);
+const createPlayerAction = new CreatePlayerAction(gameService);
+const removePlayerAction = new RemovePlayerAction(gameService);
+const movePlayerAction = new MovePlayerAction(gameService);
 const startGameAction = new StartGameAction(gameService);
+const playerAttackMonsterAction = new AttackMonsterAction(gameService)
 
 // creamos los listeners del juego
-const portalCollisionListener = new PortalCollisionListener(gameService);
-const worldMapTickListener = new WorldMapTickListener(gameService);
-gameService.addPortalCollisionListener(portalCollisionListener);
-gameService.addWorldMapTickListener(worldMapTickListener);
+const worldStatusListener = new WorldStatusListener(gameService);
+const playerAttackListener = new PlayerAttackListener(gameService);
+const playerChangeMapListener = new PlayerChangeMapListener(gameService);
+const monsterKilledListener = new MonsterKilledListener(gameService);
+
+gameService.addPlayerAttackListener(playerAttackListener);
+gameService.addWorldStatusListener(worldStatusListener);
+gameService.addPlayerChangeMapListener(playerChangeMapListener);
+gameService.addMonsterKilledListener(monsterKilledListener);
 
 // creamos los servicios de delivery
 const app = express();
@@ -53,14 +65,20 @@ socketServer.on("connection", (socket: any) => {
 
   new RemovePlayerHandler(sockets, socket, removePlayerAction);
   new MovePlayerHandler(socket, movePlayerAction);
+  new AttackMonsterHandler(socket, playerAttackMonsterAction);
 });
 
 const worldStatusNotifier = new WorldStatusNotifier(socketServer);
-const portalCollisionNotifier = new PortalCollisionNotifier(sockets);
+const playerAttackNotifier = new PlayerAttackNotifier(sockets);
+const playerChangeMapNotifier = new PlayerChangeMapNotifier(sockets);
+const monsterKilledNotifier = new MonsterKilledNotifier(socketServer);
 
 // agregamos los listeners y corremos le juego
-portalCollisionListener.suscribe(portalCollisionNotifier);
-worldMapTickListener.suscribe(worldStatusNotifier);
+worldStatusListener.suscribe(worldStatusNotifier);
+playerAttackListener.suscribe(playerAttackNotifier);
+playerChangeMapListener.suscribe(playerChangeMapNotifier);
+monsterKilledListener.suscribe(monsterKilledNotifier);
+
 startGameAction.execute();
 
 // algunos metodos de api

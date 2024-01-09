@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Position } from "../domain/entities/generic/Position";
 import { Size } from "../domain/entities/generic/Size";
 
@@ -41,8 +42,12 @@ const isOverlapping = (entityPosition: Position, entitySize: Size, targetPositio
     entityPosition.y + entitySize.height > targetPosition.y
 }
 
-export const xor = (a: boolean, b: boolean) => {
+const xor = (a: boolean, b: boolean) => {
   return (a && !b) || (!a && b);
+}
+
+const getRandomId = () => {
+  return randomUUID();
 }
 
 export const MathUtils = {
@@ -51,5 +56,6 @@ export const MathUtils = {
   constantLerp,
   getDistanceBetween,
   isOverlapping,
-  xor
+  xor,
+  getRandomId
 }

@@ -1,4 +1,5 @@
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
+import { GameService } from "../../../domain/services/GameService";
 import { Action } from "../Action";
 
 export interface CreatePlayerActionParams {
@@ -9,10 +10,10 @@ export interface CreatePlayerActionParams {
 
 export class CreatePlayerAction implements Action<CreatePlayerActionParams, void> {
 
-  constructor(private readonly playerRepository: PlayerRepository) { }
+  constructor(private readonly gameService: GameService) { }
 
   public execute(params: CreatePlayerActionParams): void {
-    this.playerRepository.addPlayer({
+    const player = {
       id: params.id,
       name: params.name,
       worldMapId: params.worldMapId,
@@ -43,6 +44,7 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         x: 620,
         y: 580
       }
-    })
+    };
+    this.gameService.addPlayer(player);
   }
 }

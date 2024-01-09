@@ -1,4 +1,5 @@
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
+import { GameService } from "../../../domain/services/GameService";
 import { Action } from "../Action";
 
 export interface RemovePlayerActionParams {
@@ -7,9 +8,9 @@ export interface RemovePlayerActionParams {
 
 export class RemovePlayerAction implements Action<RemovePlayerActionParams, void> {
 
-  constructor(private readonly playerRepository: PlayerRepository) { }
+  constructor(private readonly gameService: GameService) { }
 
   public execute(params: RemovePlayerActionParams): void {
-    this.playerRepository.removePlayer(params.id)
+    this.gameService.removePlayer(params.id)
   }
 }
