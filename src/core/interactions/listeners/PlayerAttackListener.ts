@@ -1,10 +1,6 @@
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 
-export interface PlayerAttackListenerParams {
-  playerId: string
-}
-
 export class PlayerAttackListener implements GameServiceListener {
   private listeners: GameServiceListener[] = [];
 
@@ -12,9 +8,9 @@ export class PlayerAttackListener implements GameServiceListener {
     this.gameService.addPlayerAttackListener(this);
   }
 
-  public notify(params: PlayerAttackListenerParams): void {
+  public notify(playerId: string): void {
     this.listeners.forEach(listener => {
-      listener.notify(params);
+      listener.notify(playerId);
     })
   }
 

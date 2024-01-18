@@ -58,6 +58,7 @@ const socketServer = new SocketServer(server, {
 // definimos los mensajes del servidor al cliente y viceversa
 const sockets: Record<string, Socket> = {}
 socketServer.on("connection", (socket: any) => {
+  console.log("connected", socket.id);
   sockets[socket.id] = socket;
   // TODO: cambiar la dependencia de la accion al game service (o el game service a la altura de las acciones)
   createPlayerAction.execute({ id: socket.id, name: socket.id, worldMapId: "testMap" });

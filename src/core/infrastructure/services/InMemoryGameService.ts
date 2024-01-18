@@ -63,7 +63,6 @@ export class InMemoryGameService implements GameService {
   }
 
   public start() {
-
     this.worldMapRepository.getAll().forEach(worldMap => {
       this.gameLoopTimers[worldMap.id] = setInterval(() => {
 
@@ -93,6 +92,9 @@ export class InMemoryGameService implements GameService {
   public removePlayer(playerId: string): void {
     delete this.players[playerId];
   }
+
+  // monsters
+  // --------------------------------------
 
   public addMonster(monster: Monster): void {
     if (!this.monsters[monster.id]) {
@@ -217,9 +219,7 @@ export class InMemoryGameService implements GameService {
 
   public notifyPlayerAttackListener(playerId: string) {
     this.playerAttackListener.forEach(listener => {
-      listener.notify({
-        playerId: playerId
-      });
+      listener.notify(playerId);
     });
   }
 
@@ -239,7 +239,7 @@ export class InMemoryGameService implements GameService {
 
   public notifyMonsterKilled(monster: Monster) {
     this.monsterKilledListener.forEach(listener => {
-      listener.notify({ monster });
+      listener.notify(monster);
     });
   }
 

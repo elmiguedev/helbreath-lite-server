@@ -1,17 +1,16 @@
 import { Server, Socket } from "socket.io";
 import { GameServiceListener } from "../../../core/domain/services/GameServiceListener";
-import { MonsterKilledListenerParams } from "../../../core/interactions/listeners/MonsterKilledListener";
+import { Monster } from "../../../core/domain/entities/monster/Monster";
 
 export const MONSTER_KILLED_MESSAGE = "monster:killed";
 
 export class MonsterKilledNotifier implements GameServiceListener {
   constructor(private readonly socketServer: Server) { }
 
-  notify(params: MonsterKilledListenerParams): void {
-    console.log(params);
+  notify(monster: Monster): void {
     this.socketServer
-      .to(params.monster.worldMapId)
-      .emit(MONSTER_KILLED_MESSAGE, params);
+      .to(monster.worldMapId)
+      .emit(MONSTER_KILLED_MESSAGE, monster);
   }
 
 }

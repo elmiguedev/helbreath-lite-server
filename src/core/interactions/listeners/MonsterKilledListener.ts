@@ -2,10 +2,6 @@ import { Monster } from "../../domain/entities/monster/Monster";
 import { GameService } from "../../domain/services/GameService";
 import { GameServiceListener } from "../../domain/services/GameServiceListener";
 
-export interface MonsterKilledListenerParams {
-  monster: Monster
-}
-
 export class MonsterKilledListener implements GameServiceListener {
   private listeners: GameServiceListener[] = [];
 
@@ -13,9 +9,9 @@ export class MonsterKilledListener implements GameServiceListener {
     this.gameService.addMonsterKilledListener(this);
   }
 
-  public notify(params: MonsterKilledListenerParams): void {
+  public notify(monster: Monster): void {
     this.listeners.forEach(listener => {
-      listener.notify(params);
+      listener.notify(monster);
     })
   }
 

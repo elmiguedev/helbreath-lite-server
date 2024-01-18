@@ -3,20 +3,17 @@ import { GameServiceListener } from "../../../core/domain/services/GameServiceLi
 
 const PLAYER_ATTACK_MESSAGE = "player:attack";
 
-export interface PlayerAttackNotifierParams {
-  playerId: string;
-}
-
 export class PlayerAttackNotifier implements GameServiceListener {
 
   constructor(private readonly sockets: Record<string, Socket>) { }
 
-  notify(params: PlayerAttackNotifierParams): void {
-    console.log("PASA AL NOTIFIER", params);
-    const playerSocket = this.sockets[params.playerId];
+  notify(playerId: string): void {
+    const playerSocket = this.sockets[playerId];
     playerSocket
       .broadcast
-      .emit(PLAYER_ATTACK_MESSAGE, params);
+      .emit(PLAYER_ATTACK_MESSAGE, playerId);
+    playerSocket
+      .emit(PLAYER_ATTACK_MESSAGE, playerId);
   }
 
 }
