@@ -40,10 +40,6 @@ export class InMemoryGameService implements GameService {
         const monster: Monster = {
           id: MathUtils.getRandomId(),
           type: "dummy",
-          damage: 1,
-          defenseRatio: 1,
-          health: 100,
-          hitRatio: 1,
           name: "dummy",
           position: {
             x: MathUtils.getRandomBetween(600, 700),
@@ -53,7 +49,17 @@ export class InMemoryGameService implements GameService {
             width: 16,
             height: 16
           },
-          worldMapId: "testMap"
+          worldMapId: "testMap",
+          stats: {
+            maxHealth: 60, // TODO: en realidad tiene una tirada el dummy de 10d8, pero despues lo veremos
+            health: 60,
+            maxMana: 0,
+            mana: 0,
+            damage: 0,
+            defenseRatio: 80,
+            hitRatio: 30,
+            physicalAbsortion: 0,
+          }
         };
 
         this.monsters[monster.id] = monster;

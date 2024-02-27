@@ -4,6 +4,6 @@ export interface PlayerAttributes {
   vitality: number;
   intelligence: number;
   magic: number;
-  luck: number;
   charisma: number;
+  luck: number;
 }
