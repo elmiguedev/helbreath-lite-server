@@ -1,11 +1,10 @@
-import { WorldMap } from "../../domain/entities/world/WorldMap";
-import { WorldMapRepository } from "../../domain/repositories/WorldMapRepository";
-import { TiledMap, TiledMapLayer, TiledMapObject } from "../../utils/TiledMap";
-import { SolidBlock } from "../../domain/entities/world/SolidBlock";
+import { WorldMap } from "../../../domain/entities/world/WorldMap";
+import { WorldMapRepository } from "../../../domain/repositories/worldmap/WorldMapRepository";
+import { TiledMap, TiledMapObject } from "../../../utils/TiledMap";
+import { SolidBlock } from "../../../domain/entities/world/SolidBlock";
 
-import TestMapJson from "../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";
-import HouseMapJson from "../../../../../helbreath-lite-client/src/assets/tilemaps/house/house.json";
-import { PortalBlock } from "../../domain/entities/world/PortalBlock";
+import TestMapJson from "../../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";
+import HouseMapJson from "../../../../../../helbreath-lite-client/src/assets/tilemaps/house/house.json";
 
 export class InMemoryWorldMapRepository implements WorldMapRepository {
   private tiledMaps: Record<string, TiledMap>;

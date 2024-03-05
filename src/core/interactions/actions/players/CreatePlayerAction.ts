@@ -1,6 +1,5 @@
 import { Player } from "../../../domain/entities/player/Player";
-import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
-import { GameService } from "../../../domain/services/GameService";
+import { PlayerService } from "../../../domain/services/player/PlayerService";
 import { Action } from "../Action";
 
 export interface CreatePlayerActionParams {
@@ -11,7 +10,9 @@ export interface CreatePlayerActionParams {
 
 export class CreatePlayerAction implements Action<CreatePlayerActionParams, void> {
 
-  constructor(private readonly gameService: GameService) { }
+  constructor(
+    private readonly playerService: PlayerService
+  ) { }
 
   public execute(params: CreatePlayerActionParams): void {
     // TODO:  esto no va aca sino que se trae de la base de 
@@ -56,6 +57,6 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         staff: 100
       }
     };
-    this.gameService.addPlayer(player);
+    this.playerService.addPlayer(player);
   }
 }

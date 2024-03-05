@@ -1,5 +1,4 @@
-import { TiledMap, TiledMapLayer } from "../../utils/TiledMap";
-import { WorldMap } from "../entities/world/WorldMap";
+import { WorldMap } from "../../entities/world/WorldMap";
 
 export interface WorldMapRepository {
   addMap(worldMap: WorldMap): void;

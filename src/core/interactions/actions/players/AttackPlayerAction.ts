@@ -1,5 +1,4 @@
-import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
-import { GameService } from "../../../domain/services/GameService";
+import { PlayerService } from "../../../domain/services/player/PlayerService";
 import { Action } from "../Action";
 
 export interface AttackPlayerActionParams {
@@ -9,7 +8,7 @@ export interface AttackPlayerActionParams {
 
 export class AttackPlayerAction implements Action<AttackPlayerActionParams, void> {
   constructor(
-    private readonly gameService: GameService,
+    private readonly playerService: PlayerService,
   ) { }
 
   public execute(params: AttackPlayerActionParams): void {

@@ -1,11 +1,13 @@
-import { GameService } from "../../domain/services/GameService";
-import { GameServiceListener } from "../../domain/services/GameServiceListener";
+import { PlayerService } from "../../domain/services/player/PlayerService";
+import { ServiceListener } from "../../utils/ServiceListener";
 
-export class PlayerAttackListener implements GameServiceListener {
-  private listeners: GameServiceListener[] = [];
+export class PlayerAttackListener implements ServiceListener<string> {
+  private listeners: ServiceListener<string>[] = [];
 
-  constructor(private readonly gameService: GameService) {
-    this.gameService.addPlayerAttackListener(this);
+  constructor(
+    private readonly playerService: PlayerService
+  ) {
+    this.playerService.addPlayerAttackListener(this);
   }
 
   public notify(playerId: string): void {
@@ -14,7 +16,7 @@ export class PlayerAttackListener implements GameServiceListener {
     })
   }
 
-  public suscribe(listener: GameServiceListener) {
+  public suscribe(listener: ServiceListener<string>) {
     this.listeners.push(listener);
   }
 }

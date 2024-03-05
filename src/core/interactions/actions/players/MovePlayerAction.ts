@@ -1,5 +1,5 @@
 import { Position } from "../../../domain/entities/generic/Position";
-import { GameService } from "../../../domain/services/GameService";
+import { PlayerService } from "../../../domain/services/player/PlayerService";
 import { Action } from "../Action";
 
 export interface MovePlayerActionParams {
@@ -8,11 +8,13 @@ export interface MovePlayerActionParams {
 }
 
 export class MovePlayerAction implements Action<MovePlayerActionParams, void> {
-  constructor(private readonly gameService: GameService) { }
+  constructor(
+    private readonly playerService: PlayerService
+  ) { }
 
   public execute(params: MovePlayerActionParams): void {
     const { id, position } = params;
-    const player = this.gameService.getPlayer(id);
+    const player = this.playerService.getPlayer(id);
     if (player) {
       player.target = position;
     }

@@ -1,15 +1,16 @@
 import { Socket } from "socket.io";
-import { GameServiceListener } from "../../../core/domain/services/GameServiceListener";
 import { WorldMapChange } from "../../../core/domain/entities/world/WorldMapChange";
+import { ServiceListener } from "../../../core/utils/ServiceListener";
 
 export const PLAYER_CHANGE_MAP_MESSAGE = "player:changemap"
 export const PLAYER_DISCONNECTED_MESSAGE = "player:disconnected"
 
-export class PlayerChangeMapNotifier implements GameServiceListener {
+export class PlayerChangeMapNotifier implements ServiceListener<WorldMapChange[]> {
 
   constructor(private readonly sockets: Record<string, Socket>) { }
 
   notify(changes: WorldMapChange[]): void {
+
     changes.forEach((change: WorldMapChange) => {
       const playerSocket = this.sockets[change.playerId];
       playerSocket.leave(change.fromWorldMapId);

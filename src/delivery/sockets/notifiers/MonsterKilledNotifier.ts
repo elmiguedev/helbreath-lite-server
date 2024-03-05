@@ -1,10 +1,10 @@
 import { Server, Socket } from "socket.io";
-import { GameServiceListener } from "../../../core/domain/services/GameServiceListener";
 import { Monster } from "../../../core/domain/entities/monster/Monster";
+import { ServiceListener } from "../../../core/utils/ServiceListener";
 
 export const MONSTER_KILLED_MESSAGE = "monster:killed";
 
-export class MonsterKilledNotifier implements GameServiceListener {
+export class MonsterKilledNotifier implements ServiceListener<Monster> {
   constructor(private readonly socketServer: Server) { }
 
   notify(monster: Monster): void {

@@ -1,9 +1,9 @@
 import { Socket } from "socket.io";
-import { GameServiceListener } from "../../../core/domain/services/GameServiceListener";
+import { ServiceListener } from "../../../core/utils/ServiceListener";
 
 const PLAYER_ATTACK_MESSAGE = "player:attack";
 
-export class PlayerAttackNotifier implements GameServiceListener {
+export class PlayerAttackNotifier implements ServiceListener<string> {
 
   constructor(private readonly sockets: Record<string, Socket>) { }
 

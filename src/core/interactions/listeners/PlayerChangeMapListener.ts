@@ -1,12 +1,14 @@
 import { WorldMapChange } from "../../domain/entities/world/WorldMapChange";
-import { GameService } from "../../domain/services/GameService";
-import { GameServiceListener } from "../../domain/services/GameServiceListener";
+import { PlayerService } from "../../domain/services/player/PlayerService";
+import { ServiceListener } from "../../utils/ServiceListener";
 
-export class PlayerChangeMapListener implements GameServiceListener {
-  private listeners: GameServiceListener[] = [];
+export class PlayerChangeMapListener implements ServiceListener<WorldMapChange[]> {
+  private listeners: ServiceListener<WorldMapChange[]>[] = [];
 
-  constructor(private readonly gameService: GameService) {
-    this.gameService.addPlayerChangeMapListener(this);
+  constructor(
+    private readonly playerService: PlayerService
+  ) {
+    this.playerService.addPlayerChangeMapListener(this);
   }
 
   public notify(changes: WorldMapChange[]): void {
@@ -15,7 +17,7 @@ export class PlayerChangeMapListener implements GameServiceListener {
     })
   }
 
-  public suscribe(listener: GameServiceListener) {
+  public suscribe(listener: ServiceListener<WorldMapChange[]>) {
     this.listeners.push(listener);
   }
 }

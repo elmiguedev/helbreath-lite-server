@@ -1,14 +1,13 @@
 import express from "express";
 import { createServer } from "node:http";
 import { Socket, Server as SocketServer } from "socket.io";
-import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/InMemoryPlayerRepository";
+import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/player/InMemoryPlayerRepository";
 import { CreatePlayerAction } from "./core/interactions/actions/players/CreatePlayerAction";
 import { RemovePlayerAction } from "./core/interactions/actions/players/RemovePlayerAction";
 import { MovePlayerAction } from "./core/interactions/actions/players/MovePlayerAction";
 import { MovePlayerHandler } from "./delivery/sockets/handlers/MovePlayerHandler";
 import { RemovePlayerHandler } from "./delivery/sockets/handlers/RemovePlayerHandler";
-import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/InMemoryWorldMapRepository";
-import { InMemoryGameService } from "./core/infrastructure/services/InMemoryGameService";
+import { InMemoryWorldMapRepository } from "./core/infrastructure/repositories/worldmap/InMemoryWorldMapRepository";
 import { PlayerChangeMapListener } from "./core/interactions/listeners/PlayerChangeMapListener";
 import { WorldStatusNotifier } from "./delivery/sockets/notifiers/WorldStatusNotifier";
 import { PlayerChangeMapNotifier } from "./delivery/sockets/notifiers/PlayerChangeMapNotifier";
@@ -20,31 +19,38 @@ import { PlayerAttackNotifier } from "./delivery/sockets/notifiers/PlayerAttackN
 import { WorldStatusListener } from "./core/interactions/listeners/WorldStatusListener";
 import { AttackMonsterAction } from "./core/interactions/actions/players/AttackMonsterAction";
 import { AttackMonsterHandler } from "./delivery/sockets/handlers/AttackMonsterHandler";
+import { InMemoryPlayerService } from "./core/infrastructure/services/player/InMemoryPlayerService";
+import { InMemoryMonsterRepository } from "./core/infrastructure/repositories/monster/InMemoryMonsterRepository";
+import { InMemoryMonsterService } from "./core/infrastructure/services/monster/InMemoryMonsterService";
+import { InMemoryWorldMapService } from "./core/infrastructure/services/worldmap/InMemoryWorldMapService";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
+const monsterRepository = new InMemoryMonsterRepository();
 const worldMapRepository = new InMemoryWorldMapRepository();
 
 // creamos el servicio principal del juego
-const gameService = new InMemoryGameService(playerRepository, worldMapRepository);
+const playerService = new InMemoryPlayerService(playerRepository, monsterRepository, worldMapRepository);
+const monsterService = new InMemoryMonsterService(monsterRepository);
+const worldMapService = new InMemoryWorldMapService(worldMapRepository, playerRepository, monsterRepository);
 
 // creamos las acciones del juego
-const createPlayerAction = new CreatePlayerAction(gameService);
-const removePlayerAction = new RemovePlayerAction(gameService);
-const movePlayerAction = new MovePlayerAction(gameService);
-const startGameAction = new StartGameAction(gameService);
-const playerAttackMonsterAction = new AttackMonsterAction(gameService)
+const createPlayerAction = new CreatePlayerAction(playerService);
+const removePlayerAction = new RemovePlayerAction(playerService);
+const movePlayerAction = new MovePlayerAction(playerService);
+const playerAttackMonsterAction = new AttackMonsterAction(playerService, monsterService)
+const startGameAction = new StartGameAction(playerService, monsterService, worldMapService);
 
 // creamos los listeners del juego
-const worldStatusListener = new WorldStatusListener(gameService);
-const playerAttackListener = new PlayerAttackListener(gameService);
-const playerChangeMapListener = new PlayerChangeMapListener(gameService);
-const monsterKilledListener = new MonsterKilledListener(gameService);
+const worldStatusListener = new WorldStatusListener(worldMapService);
+const playerAttackListener = new PlayerAttackListener(playerService);
+const playerChangeMapListener = new PlayerChangeMapListener(playerService);
+const monsterKilledListener = new MonsterKilledListener(monsterService);
 
-gameService.addPlayerAttackListener(playerAttackListener);
-gameService.addWorldStatusListener(worldStatusListener);
-gameService.addPlayerChangeMapListener(playerChangeMapListener);
-gameService.addMonsterKilledListener(monsterKilledListener);
+worldMapService.addWorldStatusListener(worldStatusListener);
+playerService.addPlayerChangeMapListener(playerChangeMapListener);
+playerService.addPlayerAttackListener(playerAttackListener);
+monsterService.addMonsterKilledListener(monsterKilledListener);
 
 // creamos los servicios de delivery
 const app = express();

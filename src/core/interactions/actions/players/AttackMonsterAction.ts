@@ -1,5 +1,5 @@
-import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
-import { GameService } from "../../../domain/services/GameService";
+import { MonsterService } from "../../../domain/services/monster/MonsterService";
+import { PlayerService } from "../../../domain/services/player/PlayerService";
 import { PLAYER_MIN_ATTACK_DISTANCE } from "../../../utils/Constants";
 import { MathUtils } from "../../../utils/MathUtils";
 import { Action } from "../Action";
@@ -11,12 +11,13 @@ export interface AttackMonsterActionParams {
 
 export class AttackMonsterAction implements Action<AttackMonsterActionParams, void> {
   constructor(
-    private readonly gameService: GameService,
+    private readonly playerService: PlayerService,
+    private readonly monsterService: MonsterService,
   ) { }
 
   public execute(params: AttackMonsterActionParams): void {
-    const player = this.gameService.getPlayer(params.playerId);
-    const monster = this.gameService.getMonster(params.targetId);
+    const player = this.playerService.getPlayer(params.playerId);
+    const monster = this.monsterService.getMonster(params.targetId);
 
     if (player && monster) {
       // 1. get distance between monster and player to check if it can attack
@@ -60,7 +61,7 @@ export class AttackMonsterAction implements Action<AttackMonsterActionParams, vo
         console.log("Monster current HP: ", monster.stats.health);
 
         if (monster.stats.health <= 0) {
-          this.gameService.killMonster(monster.id);
+          this.monsterService.killMonster(monster.id);
         }
 
 
@@ -68,14 +69,7 @@ export class AttackMonsterAction implements Action<AttackMonsterActionParams, vo
         console.log("Player erra :(")
       }
 
-      // LA FORMA VIEJA:
-      // --------------------
-      // monster.stats.health -= 10 // TODO: change hit and damage logic
-      // if (monster.stats.health <= 0) {
-      //   this.gameService.killMonster(monster.id);
-      // }
-
-      this.gameService.attack(player.id);
+      this.playerService.notifyPlayerAttack(player.id);
     }
   }
 
