@@ -50,6 +50,10 @@ const getRandomId = () => {
   return randomUUID();
 }
 
+const fixProbability = (probability: number, min: number, max: number) => {
+  return Math.max(min, Math.min(max, probability));
+}
+
 export const MathUtils = {
   getRandomBetween,
   lerp,
@@ -57,5 +61,6 @@ export const MathUtils = {
   getDistanceBetween,
   isOverlapping,
   xor,
-  getRandomId
+  getRandomId,
+  fixProbability
 }

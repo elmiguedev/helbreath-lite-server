@@ -14,4 +14,8 @@ export interface PlayerService {
   removePlayer(playerId: string): void;
   movePlayer(player: Player, worldMap: WorldMap): void;
   updatePlayersPosition(worldMap: WorldMap): void;
+
+  getPlayerHitRatio(player: Player): number;
+  getPlayerDamage(player: Player, enemyPhysicalAbsortion?: number): number;
+  isAttackSuccess(hitRatio: number, defenseRatio: number): boolean;
 }

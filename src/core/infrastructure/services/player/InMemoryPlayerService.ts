@@ -5,10 +5,11 @@ import { MonsterRepository } from "../../../domain/repositories/monster/MonsterR
 import { PlayerRepository } from "../../../domain/repositories/player/PlayerRepository";
 import { WorldMapRepository } from "../../../domain/repositories/worldmap/WorldMapRepository";
 import { PlayerService } from "../../../domain/services/player/PlayerService";
-import { MAX_PLAYER_SPEED } from "../../../utils/Constants";
+import { MAX_PLAYER_SPEED, PLAYER_CHANCE_TO_HIT_FACTOR, PLAYER_CHANCE_TO_HIT_MAX, PLAYER_CHANCE_TO_HIT_MIN, PLAYER_DAMAGE_BONUS_FACTOR, PLAYER_HIT_RATIO_FACTOR } from "../../../utils/Constants";
 import { MathUtils } from "../../../utils/MathUtils";
 import { ServiceListener } from "../../../utils/ServiceListener";
 import { WorldMapChange } from "../../../domain/entities/world/WorldMapChange";
+import { Monster } from "../../../domain/entities/monster/Monster";
 
 export class InMemoryPlayerService implements PlayerService {
   private playerAttackListeners: ServiceListener<string>[] = [];
@@ -72,6 +73,36 @@ export class InMemoryPlayerService implements PlayerService {
     });
   }
 
+  public getPlayerHitRatio(player: Player): number {
+    // TODO: el skill en realidad es del armar que tiene equipada
+    return player.attributes.dexterity >= 50
+      ? player.skills.shortSword + (player.attributes.dexterity - 50) * PLAYER_HIT_RATIO_FACTOR
+      : player.skills.shortSword;
+  }
+
+  public isAttackSuccess(hitRatio: number, defenseRatio: number): boolean {
+    const chanceToHit = (hitRatio / defenseRatio) * PLAYER_CHANCE_TO_HIT_FACTOR;
+    const finalHitChange = MathUtils.fixProbability(
+      chanceToHit,
+      PLAYER_CHANCE_TO_HIT_MIN,
+      PLAYER_CHANCE_TO_HIT_MAX
+    )
+    const attackThrow = Math.random();
+    return attackThrow <= finalHitChange;
+  }
+
+  public getPlayerDamage(player: Player, enemyPhysicalAbsortion: number = 0): number {
+    // Damage = weapon damage + str bonus (20% when str >= 100 or 40% if str >= 200)
+    // Mock: using a Gladius sword
+    const weaponDamage = 4;
+    const strBonus = player.attributes.strength >= 100 ? weaponDamage * PLAYER_DAMAGE_BONUS_FACTOR : 0
+    const damage = weaponDamage + strBonus
+
+    console.log("Player weapon damage", weaponDamage)
+    console.log("Player damage: ", damage);
+
+    return damage - (damage * (enemyPhysicalAbsortion / 100));
+  }
 
   private updatePlayerPosition(player: Player, worldMap: WorldMap): void {
     if (player.target) {
@@ -130,5 +161,7 @@ export class InMemoryPlayerService implements PlayerService {
       listener.notify(changes);
     });
   }
+
+
 
 }
