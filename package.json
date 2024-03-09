@@ -1,16 +1,10 @@
 {
   "name": "helbreath-lite-server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "nodemon src/Index.ts -r dotenv/config",
     "start": "node ./dist/index.js",
     "build": "tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.5",
