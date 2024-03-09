@@ -1,7 +1,7 @@
 {
   "name": "helbreath-lite-server",
   "scripts": {
-    "dev": "nodemon src/Index.ts -r dotenv/config",
+    "dev": "nodemon src/index.ts -r dotenv/config",
     "start": "node ./dist/index.js",
     "build": "tsc"
   },
