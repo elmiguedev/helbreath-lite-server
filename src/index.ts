@@ -1,5 +1,5 @@
 import express from "express";
-import { createServer } from "node:https";
+import { createServer } from "node:http";
 import { Socket, Server as SocketServer } from "socket.io";
 import { InMemoryPlayerRepository } from "./core/infrastructure/repositories/player/InMemoryPlayerRepository";
 import { CreatePlayerAction } from "./core/interactions/actions/players/CreatePlayerAction";
