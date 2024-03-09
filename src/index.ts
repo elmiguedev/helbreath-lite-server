@@ -92,6 +92,9 @@ startGameAction.execute();
 app.get("/ping", (req, res) => {
   res.send("Pong!");
 })
+app.get("/", (req, res) => {
+  res.send("Vamo a juga al helbreath :D");
+})
 
 server.listen(process.env.PORT || 3000, () => {
   console.log("Listening on port 3000");
