@@ -10,7 +10,6 @@ RUN npm install -g pnpm
 RUN pnpm install
 RUN pnpm run build
 
-ENV PORT=6699
-EXPOSE 6699
+EXPOSE 3000
 
 CMD ["npm", "run", "start"]
