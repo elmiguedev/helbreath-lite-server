@@ -55,6 +55,8 @@ export class StartGameAction implements Action<void, void> {
             defenseRatio: 80,
             hitRatio: 30,
             physicalAbsortion: 0,
+            minExperience: 162,
+            maxExperience: 292
           }
         };
 

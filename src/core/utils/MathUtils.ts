@@ -54,8 +54,13 @@ const fixProbability = (probability: number, min: number, max: number) => {
   return Math.max(min, Math.min(max, probability));
 }
 
+const getIntegerBetween = (min: number, max: number) => {
+  return Math.floor(getRandomBetween(min, max));
+}
+
 export const MathUtils = {
   getRandomBetween,
+  getIntegerBetween,
   lerp,
   constantLerp,
   getDistanceBetween,

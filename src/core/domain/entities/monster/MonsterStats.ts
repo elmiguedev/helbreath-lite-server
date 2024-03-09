@@ -7,4 +7,6 @@ export interface MonsterStats {
   defenseRatio: number;
   damage: number;
   physicalAbsortion: number;
+  minExperience: number;
+  maxExperience: number;
 }

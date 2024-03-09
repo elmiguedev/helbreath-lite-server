@@ -38,12 +38,13 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
       stats: {
         experience: 13365,
         health: 122,
-        level: 11,
+        level: 20,
         mana: 67,
         maxHealth: 122,
         maxMana: 67,
         maxStamina: 122,
-        stamina: 122
+        stamina: 122,
+        freeLevelPoints: 0
       },
       position: {
         x: 620,

@@ -7,4 +7,5 @@ export interface PlayerStats {
   maxStamina: number;
   experience: number;
   level: number;
+  freeLevelPoints: number;
 }

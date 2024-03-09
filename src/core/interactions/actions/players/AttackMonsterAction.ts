@@ -42,7 +42,14 @@ export class AttackMonsterAction implements Action<AttackMonsterActionParams, vo
         console.log("Monster current HP: ", monster.stats.health);
 
         if (monster.stats.health <= 0) {
+          const experience = this.monsterService.getMonsterExperience(monster);
+          this.playerService.addPlayerExperience(player.id, experience);
           this.monsterService.killMonster(monster.id);
+
+          console.log()
+          console.log("CHAU MOSTRO!! ", player.stats)
+          console.log()
+
         }
 
       } else {

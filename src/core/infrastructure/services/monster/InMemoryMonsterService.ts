@@ -1,6 +1,7 @@
 import { Monster } from "../../../domain/entities/monster/Monster";
 import { MonsterRepository } from "../../../domain/repositories/monster/MonsterRepository";
 import { MonsterService } from "../../../domain/services/monster/MonsterService";
+import { MathUtils } from "../../../utils/MathUtils";
 import { ServiceListener } from "../../../utils/ServiceListener";
 
 export class InMemoryMonsterService implements MonsterService {
@@ -41,6 +42,13 @@ export class InMemoryMonsterService implements MonsterService {
 
   public getMonstersByWorldMap(worldMapId: string): Monster[] {
     return this.monsterRepository.getByWorldMap(worldMapId);
+  }
+
+  public getMonsterExperience(monster: Monster): number {
+    return MathUtils.getIntegerBetween(
+      monster.stats.minExperience,
+      monster.stats.maxExperience
+    );
   }
 
 }

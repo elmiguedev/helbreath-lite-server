@@ -8,4 +8,6 @@ export interface MonsterService {
   getMonstersByWorldMap(worldMapId: string): Monster[];
   removeMonster(monsterId: string): Monster | undefined;
   killMonster(monsterId: string): void;
+  getMonsterExperience(monster: Monster): number;
+
 }

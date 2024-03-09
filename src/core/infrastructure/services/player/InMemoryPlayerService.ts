@@ -5,7 +5,7 @@ import { MonsterRepository } from "../../../domain/repositories/monster/MonsterR
 import { PlayerRepository } from "../../../domain/repositories/player/PlayerRepository";
 import { WorldMapRepository } from "../../../domain/repositories/worldmap/WorldMapRepository";
 import { PlayerService } from "../../../domain/services/player/PlayerService";
-import { MAX_PLAYER_SPEED, PLAYER_CHANCE_TO_HIT_FACTOR, PLAYER_CHANCE_TO_HIT_MAX, PLAYER_CHANCE_TO_HIT_MIN, PLAYER_DAMAGE_BONUS_FACTOR, PLAYER_HIT_RATIO_FACTOR } from "../../../utils/Constants";
+import { MAX_PLAYER_SPEED, PLAYER_CHANCE_TO_HIT_FACTOR, PLAYER_CHANCE_TO_HIT_MAX, PLAYER_CHANCE_TO_HIT_MIN, PLAYER_DAMAGE_BONUS_FACTOR, PLAYER_EXPERIENCE_ARRAY, PLAYER_HIT_RATIO_FACTOR, PLAYER_LEVEL_POINTS } from "../../../utils/Constants";
 import { MathUtils } from "../../../utils/MathUtils";
 import { ServiceListener } from "../../../utils/ServiceListener";
 import { WorldMapChange } from "../../../domain/entities/world/WorldMapChange";
@@ -104,6 +104,31 @@ export class InMemoryPlayerService implements PlayerService {
     return damage - (damage * (enemyPhysicalAbsortion / 100));
   }
 
+  public addPlayerExperience(playerId: string, experience: number): void {
+    const player = this.playerRepository.getById(playerId);
+    if (player) {
+      let currentLevel = 0;
+      player.stats.experience += experience;
+      for (let level = 0; level < PLAYER_EXPERIENCE_ARRAY.length; level++) {
+        const baseExperience = PLAYER_EXPERIENCE_ARRAY[level];
+        if (player.stats.experience >= baseExperience) {
+          currentLevel = level;
+        } else {
+          break;
+        }
+      }
+
+      console.log("LA EXPERIENCIA QUE TENGO", player.stats.experience);
+      console.log("EL NIVEL QUE ALCANZO EN EL ARRAY", currentLevel);
+      console.log("EL NIVEL QUE TENGO YO", player.stats.level, " Y MIS FREE POINTS", player.stats.freeLevelPoints)
+
+      if (currentLevel > player.stats.level) {
+        player.stats.freeLevelPoints += (currentLevel - player.stats.level) * PLAYER_LEVEL_POINTS;
+        player.stats.level = currentLevel;
+      }
+    }
+  }
+
   private updatePlayerPosition(player: Player, worldMap: WorldMap): void {
     if (player.target) {
       const distance = MathUtils.getDistanceBetween(player.position, player.target);
@@ -162,6 +187,10 @@ export class InMemoryPlayerService implements PlayerService {
     });
   }
 
-
+  private getLevelBaseExperience(level: number): number {
+    if (level === 0) return 0;
+    let xp = this.getLevelBaseExperience(level - 1) + level * (50 + (level * (level / 17) * (level / 17)));
+    return xp;
+  }
 
 }
