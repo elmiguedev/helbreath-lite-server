@@ -3,8 +3,8 @@ import { WorldMapRepository } from "../../../domain/repositories/worldmap/WorldM
 import { TiledMap, TiledMapObject } from "../../../utils/TiledMap";
 import { SolidBlock } from "../../../domain/entities/world/SolidBlock";
 
-import TestMapJson from "../../../../../../helbreath-lite-client/src/assets/tilemaps/test/test.json";
-import HouseMapJson from "../../../../../../helbreath-lite-client/src/assets/tilemaps/house/house.json";
+import TestMapJson from "../../data/maps/test/test.json";
+import HouseMapJson from "../../data/maps/house/house.json";
 
 export class InMemoryWorldMapRepository implements WorldMapRepository {
   private tiledMaps: Record<string, TiledMap>;
