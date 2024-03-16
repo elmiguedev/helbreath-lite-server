@@ -14,6 +14,7 @@ import { Monster } from "../../../domain/entities/monster/Monster";
 export class InMemoryPlayerService implements PlayerService {
   private playerAttackListeners: ServiceListener<string>[] = [];
   private playerChangeMapListeners: ServiceListener<WorldMapChange[]>[] = [];
+  private playerLevelUpListeners: ServiceListener<Player>[] = [];
 
   constructor(
     private readonly playerRepository: PlayerRepository,
@@ -57,6 +58,10 @@ export class InMemoryPlayerService implements PlayerService {
 
   public addPlayerChangeMapListener(listener: ServiceListener<WorldMapChange[]>): void {
     this.playerChangeMapListeners.push(listener);
+  }
+
+  public addLevelUpListener(listener: ServiceListener<Player>): void {
+    this.playerLevelUpListeners.push(listener);
   }
 
   public notifyPlayerAttack(playerId: string): void {
@@ -125,6 +130,9 @@ export class InMemoryPlayerService implements PlayerService {
       if (currentLevel > player.stats.level) {
         player.stats.freeLevelPoints += (currentLevel - player.stats.level) * PLAYER_LEVEL_POINTS;
         player.stats.level = currentLevel;
+        player.stats.baseLevelExperience = PLAYER_EXPERIENCE_ARRAY[currentLevel];
+        player.stats.nextLevelExperience = PLAYER_EXPERIENCE_ARRAY[currentLevel + 1];
+        this.notifyPlayerLevelUpListeners(player);
       }
     }
   }
@@ -184,6 +192,12 @@ export class InMemoryPlayerService implements PlayerService {
   private notifyPlayerChangeMapListeners(changes: WorldMapChange[]) {
     this.playerChangeMapListeners.forEach(listener => {
       listener.notify(changes);
+    });
+  }
+
+  private notifyPlayerLevelUpListeners(player: Player) {
+    this.playerLevelUpListeners.forEach(listener => {
+      listener.notify(player);
     });
   }
 

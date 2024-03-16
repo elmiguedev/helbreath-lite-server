@@ -23,6 +23,10 @@ import { InMemoryPlayerService } from "./core/infrastructure/services/player/InM
 import { InMemoryMonsterRepository } from "./core/infrastructure/repositories/monster/InMemoryMonsterRepository";
 import { InMemoryMonsterService } from "./core/infrastructure/services/monster/InMemoryMonsterService";
 import { InMemoryWorldMapService } from "./core/infrastructure/services/worldmap/InMemoryWorldMapService";
+import { PlayerLevelUpNotifier } from "./delivery/sockets/notifiers/PlayerLevelUpNotifier";
+import { PlayerLevelUpListener } from "./core/interactions/listeners/PlayerLevelUpListener";
+import { PlayerAttributesAction } from "./core/interactions/actions/players/PlayerAttributesAction";
+import { PlayerAttributesHandler } from "./delivery/sockets/handlers/PlayerAttributesHandler";
 
 // creamos los repositorios del juego
 const playerRepository = new InMemoryPlayerRepository();
@@ -40,17 +44,14 @@ const removePlayerAction = new RemovePlayerAction(playerService);
 const movePlayerAction = new MovePlayerAction(playerService);
 const playerAttackMonsterAction = new AttackMonsterAction(playerService, monsterService)
 const startGameAction = new StartGameAction(playerService, monsterService, worldMapService);
+const playerAttributesAction = new PlayerAttributesAction(playerService);
 
 // creamos los listeners del juego
 const worldStatusListener = new WorldStatusListener(worldMapService);
 const playerAttackListener = new PlayerAttackListener(playerService);
 const playerChangeMapListener = new PlayerChangeMapListener(playerService);
 const monsterKilledListener = new MonsterKilledListener(monsterService);
-
-worldMapService.addWorldStatusListener(worldStatusListener);
-playerService.addPlayerChangeMapListener(playerChangeMapListener);
-playerService.addPlayerAttackListener(playerAttackListener);
-monsterService.addMonsterKilledListener(monsterKilledListener);
+const playerLevelUpListener = new PlayerLevelUpListener(playerService);
 
 // creamos los servicios de delivery
 const app = express();
@@ -73,11 +74,13 @@ socketServer.on("connection", (socket: any) => {
   new RemovePlayerHandler(sockets, socket, removePlayerAction);
   new MovePlayerHandler(socket, movePlayerAction);
   new AttackMonsterHandler(socket, playerAttackMonsterAction);
+  new PlayerAttributesHandler(socket, playerAttributesAction);
 });
 
 const worldStatusNotifier = new WorldStatusNotifier(socketServer);
 const playerAttackNotifier = new PlayerAttackNotifier(sockets);
 const playerChangeMapNotifier = new PlayerChangeMapNotifier(sockets);
+const playerLevelUpNotifier = new PlayerLevelUpNotifier(sockets);
 const monsterKilledNotifier = new MonsterKilledNotifier(socketServer);
 
 // agregamos los listeners y corremos le juego
@@ -85,6 +88,7 @@ worldStatusListener.suscribe(worldStatusNotifier);
 playerAttackListener.suscribe(playerAttackNotifier);
 playerChangeMapListener.suscribe(playerChangeMapNotifier);
 monsterKilledListener.suscribe(monsterKilledNotifier);
+playerLevelUpListener.suscribe(playerLevelUpNotifier);
 
 startGameAction.execute();
 

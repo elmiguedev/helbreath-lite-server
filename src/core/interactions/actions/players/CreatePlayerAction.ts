@@ -36,7 +36,7 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         height: 16,
       },
       stats: {
-        experience: 13365,
+        experience: 14565,
         health: 122,
         level: 20,
         mana: 67,
@@ -44,7 +44,9 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         maxMana: 67,
         maxStamina: 122,
         stamina: 122,
-        freeLevelPoints: 0
+        freeLevelPoints: 0,
+        nextLevelExperience: 14724,
+        baseLevelExperience: 13001
       },
       position: {
         x: 620,

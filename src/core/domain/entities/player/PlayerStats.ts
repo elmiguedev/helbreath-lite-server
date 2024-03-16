@@ -6,6 +6,8 @@ export interface PlayerStats {
   stamina: number;
   maxStamina: number;
   experience: number;
+  nextLevelExperience: number;
+  baseLevelExperience: number;
   level: number;
   freeLevelPoints: number;
 }

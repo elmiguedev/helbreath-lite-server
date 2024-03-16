@@ -6,6 +6,7 @@ import { WorldMapChange } from "../../entities/world/WorldMapChange";
 export interface PlayerService {
   addPlayerAttackListener(listener: ServiceListener<string>): void;
   addPlayerChangeMapListener(listener: ServiceListener<WorldMapChange[]>): void;
+  addLevelUpListener(listener: ServiceListener<Player>): void
 
   notifyPlayerAttack(playerId: string): void;
 
