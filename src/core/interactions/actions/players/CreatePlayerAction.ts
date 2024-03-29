@@ -26,7 +26,7 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         vitality: 20,
         charisma: 10,
         dexterity: 30,
-        strength: 20,
+        strength: 17,
         intelligence: 10,
         magic: 10,
         luck: 10
@@ -44,7 +44,7 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         maxMana: 67,
         maxStamina: 122,
         stamina: 122,
-        freeLevelPoints: 0,
+        freeLevelPoints: 3,
         nextLevelExperience: 14724,
         baseLevelExperience: 13001
       },

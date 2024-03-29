@@ -1,5 +1,5 @@
 export const GAME_LOOP_INTERVAL = 1000 / 60;
-export const MAX_PLAYER_SPEED = 2;
+export const MAX_PLAYER_SPEED = 1;
 export const PLAYER_MIN_ATTACK_DISTANCE = 32;
 
 export const PLAYER_CHANCE_TO_HIT_FACTOR = 0.5;

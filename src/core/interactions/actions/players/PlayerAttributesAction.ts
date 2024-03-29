@@ -23,6 +23,7 @@ export class PlayerAttributesAction implements Action<PlayerAttributesActionPara
       player.attributes.luck += params.attributes.luck;
       player.attributes.magic += params.attributes.magic;
       player.attributes.strength += params.attributes.strength;
+      player.attributes.vitality += params.attributes.vitality;
 
       player.stats.freeLevelPoints -= Object.values(params.attributes).reduce((a, b) => a + b, 0);
     }
