@@ -36,10 +36,27 @@ const getDistanceBetween = (position: Position, target: Position) => {
 }
 
 const isOverlapping = (entityPosition: Position, entitySize: Size, targetPosition: Position, targetSize: Size): boolean => {
-  return entityPosition.x < targetPosition.x + targetSize.width &&
-    entityPosition.x + entitySize.width > targetPosition.x &&
-    entityPosition.y < targetPosition.y + targetSize.height &&
-    entityPosition.y + entitySize.height > targetPosition.y
+  const entityRightEdge = entityPosition.x + (entitySize.width / 2);
+  const entityLeftEdge = entityPosition.x - (entitySize.width / 2);
+  const entityTopEdge = entityPosition.y - (entitySize.height / 2);
+  const entityBottomEdge = entityPosition.y + (entitySize.height / 2);
+
+  const targetRightEdge = targetPosition.x + (targetSize.width / 2);
+  const targetLeftEdge = targetPosition.x - (targetSize.width / 2);
+  const targetTopEdge = targetPosition.y - (targetSize.height / 2);
+  const targetBottomEdge = targetPosition.y + (targetSize.height / 2);
+
+  // const targetRightEdge = targetPosition.x + (targetSize.width);
+  // const targetLeftEdge = targetPosition.x;
+  // const targetTopEdge = targetPosition.y;
+  // const targetBottomEdge = targetPosition.y + (targetSize.height);
+
+
+  const horizontalOverlap = entityLeftEdge < targetLeftEdge && entityRightEdge < targetLeftEdge ? false : entityRightEdge > targetRightEdge && entityLeftEdge > targetRightEdge ? false : true;
+
+  const verticalOverlap = entityTopEdge < targetTopEdge && entityBottomEdge < targetTopEdge ? false : entityBottomEdge > targetBottomEdge && entityTopEdge > targetBottomEdge ? false : true;
+
+  return horizontalOverlap && verticalOverlap;
 }
 
 const xor = (a: boolean, b: boolean) => {

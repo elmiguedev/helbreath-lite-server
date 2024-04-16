@@ -44,8 +44,8 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
               height: tile.height
             },
             position: {
-              x: tile.x,
-              y: tile.y
+              x: tile.x + (tile.width / 2),
+              y: tile.y + (tile.height / 2)
             }
           };
           map.solids.push(solidBlock);
@@ -60,8 +60,8 @@ export class InMemoryWorldMapRepository implements WorldMapRepository {
             map.portals.push({
               worldMapId: worldMapId,
               position: {
-                x: object.x,
-                y: object.y
+                x: object.x + (object.width / 2),
+                y: object.y + (object.height / 2)
               },
               size: {
                 width: object.width,

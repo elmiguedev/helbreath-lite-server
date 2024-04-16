@@ -23,6 +23,12 @@ export class AttackMonsterAction implements Action<AttackMonsterActionParams, vo
 
       // 1. get distance between monster and player to check if it can attack
       const distance = MathUtils.getDistanceBetween(player.position, monster.position);
+
+      console.log("PLAYER POS", player.position);
+      console.log("MONSTER POS", monster.position);
+      console.log("DISTANCE", distance);
+      console.log("MIN DISTANCE", PLAYER_MIN_ATTACK_DISTANCE);
+
       if (distance > PLAYER_MIN_ATTACK_DISTANCE) return;
 
       // 2. calculate attack hit

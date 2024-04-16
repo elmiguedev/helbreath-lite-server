@@ -2,7 +2,7 @@ import { Monster } from "../../../domain/entities/monster/Monster";
 import { MonsterService } from "../../../domain/services/monster/MonsterService";
 import { PlayerService } from "../../../domain/services/player/PlayerService";
 import { WorldMapService } from "../../../domain/services/worldmap/WorldMapService";
-import { GAME_LOOP_INTERVAL } from "../../../utils/Constants";
+import { GAME_LOOP_INTERVAL, MAP_TILE_SIZE } from "../../../utils/Constants";
 import { MathUtils } from "../../../utils/MathUtils";
 import { Action } from "../Action";
 
@@ -38,12 +38,12 @@ export class StartGameAction implements Action<void, void> {
           type: "dummy",
           name: "dummy",
           position: {
-            x: MathUtils.getRandomBetween(600, 700),
-            y: MathUtils.getRandomBetween(1000, 1100)
+            x: MathUtils.getRandomBetween(5000, 6000),
+            y: MathUtils.getRandomBetween(6000, 7000)
           },
           size: {
-            width: 16,
-            height: 16
+            width: MAP_TILE_SIZE,
+            height: MAP_TILE_SIZE
           },
           worldMapId: worldMapId,
           stats: {

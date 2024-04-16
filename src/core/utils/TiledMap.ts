@@ -1,3 +1,5 @@
+import { MAP_TILE_SIZE } from "./Constants";
+
 export interface TiledMapLayerProps {
   id: number;
   data?: number[];
@@ -82,19 +84,18 @@ export class TiledMapLayer {
 
   // TODO: refactor, hacer que sea por id o por prop,
   public getExistingTiles() {
-    const tileSize = 16;
     const tiles = [];
 
     for (let i = 0; i < this.data!.length; i++) {
       const tileData = this.data![i];
       if (tileData > 0) {
-        const tileX = (i % this.tilemap.getWidth()) * tileSize;
-        const tileY = Math.floor(i / this.tilemap.getWidth()) * tileSize;
+        const tileX = (i % this.tilemap.getWidth()) * MAP_TILE_SIZE;
+        const tileY = Math.floor(i / this.tilemap.getWidth()) * MAP_TILE_SIZE;
         tiles.push({
           x: tileX,
           y: tileY,
-          width: tileSize,
-          height: tileSize
+          width: MAP_TILE_SIZE,
+          height: MAP_TILE_SIZE
         })
       }
     }

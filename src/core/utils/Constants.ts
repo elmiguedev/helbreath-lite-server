@@ -1,6 +1,9 @@
 export const GAME_LOOP_INTERVAL = 1000 / 60;
-export const MAX_PLAYER_SPEED = 1;
-export const PLAYER_MIN_ATTACK_DISTANCE = 32;
+export const MAX_PLAYER_SPEED = 6;
+export const MAP_TILE_ORIGINAL = 16;
+export const MAP_TILE_SCALE_FACTOR = 6;
+export const MAP_TILE_SIZE = MAP_TILE_ORIGINAL * MAP_TILE_SCALE_FACTOR;
+export const PLAYER_MIN_ATTACK_DISTANCE = MAP_TILE_SIZE * 2;
 
 export const PLAYER_CHANCE_TO_HIT_FACTOR = 0.5;
 export const PLAYER_CHANCE_TO_HIT_MIN = 0.1;

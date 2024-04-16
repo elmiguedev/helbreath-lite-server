@@ -1,5 +1,6 @@
 import { Player } from "../../../domain/entities/player/Player";
 import { PlayerService } from "../../../domain/services/player/PlayerService";
+import { MAP_TILE_SIZE } from "../../../utils/Constants";
 import { Action } from "../Action";
 
 export interface CreatePlayerActionParams {
@@ -32,8 +33,8 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         luck: 10
       },
       bounds: {
-        width: 16,
-        height: 16,
+        width: MAP_TILE_SIZE,
+        height: MAP_TILE_SIZE,
       },
       stats: {
         experience: 14565,
@@ -49,8 +50,8 @@ export class CreatePlayerAction implements Action<CreatePlayerActionParams, void
         baseLevelExperience: 13001
       },
       position: {
-        x: 620,
-        y: 580
+        x: 6500,
+        y: 7000
       },
       skills: {
         axe: 100,
